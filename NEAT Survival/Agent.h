@@ -4,15 +4,18 @@
 #include <allegro5/allegro_color.h>
 
 #include "Object.h"
-#include "UserInput.h"
 #include "NEAT.h"
+#include "UserInput.h"
 #include "AgentManager.h"
+#include "Food.h"
+#include "Eye.h"
 
 #include <iostream>
+#include <memory>
 
 using namespace std;
 
-class Agent : public Object {
+class Agent : public Object, public std::enable_shared_from_this<Agent> {
 private:
 	const float accSpeed = 1;
 	const float maxRotationSpeed = 0.1;
@@ -23,14 +26,20 @@ private:
 	double energy, maxEnergy;
 	double waste, maxWaste;
 	float health, maxHealth;
-	ALLEGRO_COLOR color;
+	int digestTime, digestTimeStart;
 
+	vector<float> genes;
 	shared_ptr<NEAT> nn;
+	vector<double> memory;
+	vector<shared_ptr<Eye>> eyes;
+	float eyeSpreadPercent, eyeSpreadMax;
+	float viewDistance;
 	
 	float dir;
 	float dirToFood, dirToAgent;
 	float forwardSpeed, rotationSpeed;
 	int generation;
+
 	double age;
 	double maxAge;
 
@@ -48,8 +57,16 @@ public:
 	void Draw();
 	void CollisionEvent(shared_ptr<Object> other);
 	void Reproduce();
+
+	void SetGenes(vector<float> newGenes);
+	void MutateGenes();
+	vector<float> GenerateRandomGenes();
+	vector<float> GetGenes();
+
 	void Mutate();
 	void MutateAddConnection();
+	void MutateAddNode();
+	void MutateRemoveNode();
 
 	void SetUserControlled(bool user) { this->userControlled = user; }
 	void SetEnergy(double newEnergy);
@@ -57,9 +74,9 @@ public:
 
 	float GetX();
 	float GetY();
+	float GetDir();
 	shared_ptr<NEAT> GetNN();
 	int GetGeneration();
-	bool ShouldReproduce();
 
 	double GetEnergy();
 	double GetWaste();

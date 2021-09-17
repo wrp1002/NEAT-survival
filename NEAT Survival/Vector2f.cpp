@@ -12,7 +12,7 @@ Vector2f::Vector2f(float x, float y) {
 }
 
 Vector2f Vector2f::FromDir(float dir, float mag) {
-	return Vector2f(cos(dir) * mag, sin(dir) * mag);
+	return Vector2f(cos(dir) * mag, -sin(dir) * mag);
 }
 
 float Vector2f::GetDistance(Vector2f other) {

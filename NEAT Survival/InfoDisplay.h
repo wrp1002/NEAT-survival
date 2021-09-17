@@ -30,7 +30,7 @@ namespace InfoDisplay {
 	void Hide();
 	void Draw();
 	void SelectObject(weak_ptr<Object>);
-	void DrawNN(shared_ptr<NEAT> nn);
+	string DrawNN(shared_ptr<NEAT> nn);
 
 	Vector2f CalculateNodePos(shared_ptr<Node> node);
 };

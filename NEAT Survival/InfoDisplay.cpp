@@ -36,34 +36,71 @@ void InfoDisplay::Draw() {
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 
 	ALLEGRO_FONT* font = Font::GetFont("Minecraft.ttf", 14);
+	vector<string> infoText;
 
-	al_draw_text(font, al_map_rgb(255, 255, 255), 10,					10, NULL,					format("Food: {}", GameManager::allFood.size()).c_str());
-	al_draw_text(font, al_map_rgb(255, 255, 255), screenSize.x / 2,		10, ALLEGRO_ALIGN_CENTER,	format("Objects: {}", GameManager::allObjects.size()).c_str());
-	al_draw_text(font, al_map_rgb(255, 255, 255), screenSize.x - 10,	10, ALLEGRO_ALIGN_RIGHT,	format("Agents: {}", GameManager::agents.size()).c_str());
+
+	infoText.insert(infoText.end(), {
+		format("Food: {}", GameManager::allFood.size()),
+		format("Objects: {}", GameManager::allObjects.size()),
+		format("Agents: {}", GameManager::agents.size()),
+
+		format("Total En: {:.2f}", GameManager::GetTotalEnergy()),
+		format("Speed: {}x", GameManager::GetSpeed()),
+		format("Time: {}", GameManager::GetSimTimeStr()),
+	});
 
 
 	if (!selectedObject.expired()) {
-		al_draw_text(font, al_map_rgb(255, 255, 255), 10, 25, NULL, format("X: {}  Y: {}", int(selectedObject.lock()->GetPos().x), int(selectedObject.lock()->GetPos().y)).c_str());
-		al_draw_text(font, al_map_rgb(255, 255, 255), screenSize.x / 2, 25, ALLEGRO_ALIGN_CENTER, format("Energy: {:.2f}", selectedObject.lock()->GetEnergy()).c_str());
+		shared_ptr<Object> object = selectedObject.lock();
 
-		if (selectedObject.lock()->GetType() == "agent") {
-			Agent* selectedAgent = dynamic_cast<Agent*>(selectedObject.lock().get());
-			al_draw_text(font, al_map_rgb(255, 255, 255), screenSize.x - 10, 25, ALLEGRO_ALIGN_RIGHT, format("Generation: {}", selectedAgent->GetGeneration()).c_str());
+		infoText.insert(infoText.end(), {
+			format("Energy: {:.2f}", object->GetEnergy()),
+			format("X: {}  Y: {}", int(object->GetPos().x), int(object->GetPos().y)),
+		});
 
+		if (shared_ptr<Agent> selectedAgent = dynamic_pointer_cast<Agent>(object)) {
+			infoText.insert(infoText.end(), {
+				format("Generation: {}", selectedAgent->GetGeneration()),
+				format("Health: {}%", int(selectedAgent->GetHealthPercent() * 100)),
+				format("Age: {:.2f}", selectedAgent->GetAge())
+			});
 
-			al_draw_text(font, al_map_rgb(255, 255, 255), 10, 40, NULL, format("Energy: {}%", int(selectedAgent->GetEnergyPercent() * 100)).c_str());
-			al_draw_text(font, al_map_rgb(255, 255, 255), screenSize.x - 10, 40, ALLEGRO_ALIGN_RIGHT, format("Health: {}%", int(selectedAgent->GetHealthPercent() * 100)).c_str());
-
-			al_draw_text(font, al_map_rgb(255, 255, 255), 10, 55, NULL, format("Age: {:.2f}", selectedAgent->GetAge()).c_str());
-
-			DrawNN(selectedAgent->GetNN());
+			infoText.insert(infoText.end(), {
+				"",
+				"",
+				"",
+				DrawNN(selectedAgent->GetNN()),
+			});
 		}
+	}
+
+	for (unsigned i = 0; i < infoText.size(); i++) {
+		int flags = NULL;
+		int x = 10;
+		int y = (i) / 3 * 17 + 10;
+
+		int index = (i + 1) % 3;
+
+		if (index == 0) {
+			flags = ALLEGRO_ALIGN_RIGHT;
+			x = screenSize.x - 10;
+		}
+		if (index == 1) {
+			
+		}
+		if (index == 2) {
+			flags = ALLEGRO_ALIGN_CENTRE;
+			x = screenSize.x / 2;
+		}
+
+		al_draw_text(font, al_map_rgb(255, 255, 255), x, y, flags, infoText[i].c_str());
 	}
 
 	al_flip_display();
 }
 
-void InfoDisplay::DrawNN(shared_ptr<NEAT> nn) {
+string InfoDisplay::DrawNN(shared_ptr<NEAT> nn) {
+	string selectedNodeName = "";
 	for (auto node : nn->GetNodes()) {
 		Vector2f realPos = CalculateNodePos(node);
 
@@ -86,7 +123,7 @@ void InfoDisplay::DrawNN(shared_ptr<NEAT> nn) {
 
 		if (hovering) {
 			al_draw_filled_circle(realPos.x, realPos.y, nodeSize + 1, al_map_rgb(255, 255, 255));
-			al_draw_text(Font::GetFont("Minecraft.ttf", 14), al_map_rgb(255, 255, 255), screenSize.x / 2, 25, ALLEGRO_ALIGN_CENTER, node->GetName().c_str());
+			selectedNodeName = node->GetName();
 		}
 
 		al_draw_filled_circle(realPos.x, realPos.y, nodeSize, al_map_rgb(100 - (node->GetOutput() * 100), 100 + (node->GetOutput() * 100), 0));
@@ -95,6 +132,7 @@ void InfoDisplay::DrawNN(shared_ptr<NEAT> nn) {
 			al_draw_text(Font::GetFont("Minecraft.ttf", 10), al_map_rgb(255, 255, 255), realPos.x, realPos.y - 4, ALLEGRO_ALIGN_CENTER, format("{:.2f}", node->GetOutput()).c_str());
 		}
 	}
+	return selectedNodeName;
 }
 
 void InfoDisplay::SelectObject(weak_ptr<Object> obj) {

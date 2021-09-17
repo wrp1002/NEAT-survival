@@ -31,6 +31,13 @@ namespace Globals {
 		return rand() % (max - min) + min;
 	}
 
+	static int RandomSign() {
+		if (rand() % 2 == 0)
+			return 1;
+		else
+			return -1;
+	}
+
 	static float RandomNormal() {
 		float amount = 16;
 		double sum = 0;
@@ -42,5 +49,20 @@ namespace Globals {
 
 	static double Round(double num) {
 		return double(int(num * 100) / 100);
+	}
+
+	static int Constrain(int val, int min, int max) {
+		if (val < min)
+			val = min;
+		if (val > max)
+			val = max;
+		return val;
+	}
+	static double Constrain(double val, double min, double max) {
+		if (val < min)
+			val = min;
+		if (val > max)
+			val = max;
+		return val;
 	}
 };

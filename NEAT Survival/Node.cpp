@@ -22,7 +22,8 @@ Node::~Node() {
 }
 
 void Node::Print() {
-	printf("Node(X:%f, Y:%f, Connections:%i)", this->pos.x, this->pos.y, this->allConnections.size());
+	cout << "node " << ID << " type:" << type << " X:" << pos.x << " Y:" << pos.y << endl;
+	cout << "connections:" << allConnections.size() << " toConnections:" << toConnections.size() << " fromConnections:" << fromConnections.size() << endl;
 }
 
 void Node::Calculate() {
@@ -36,8 +37,8 @@ void Node::Calculate() {
 }
 
 double Node::ActivationFunction(double input) {
-	//return tanh(input);	//tanh
-	return 1 / (1 + exp(-input));
+	//return tanh(input);			// tanh
+	return 1 / (1 + exp(-input));	// 
 }
 
 void Node::AddConnection(shared_ptr<Connection> connection) {

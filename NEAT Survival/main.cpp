@@ -25,10 +25,6 @@ int main() {
 	double lastRedrawTime = 0;
 	float maxRedrawTime = 2.0;
 
-	bool paused = false;
-	int speed = 1;
-
-
 	al_init();
 	al_init_primitives_addon();
 	al_init_font_addon();
@@ -77,22 +73,32 @@ int main() {
 					break;
 
 				case ALLEGRO_KEY_SPACE:
-					paused = !paused;
+					GameManager::TogglePaused();
 					break;
 
 				case ALLEGRO_KEY_R:
-					if (!InfoDisplay::selectedObject.expired()) {
-						if (InfoDisplay::selectedObject.lock()->GetType() == "agent")
-							dynamic_cast<Agent*>(InfoDisplay::selectedObject.lock().get())->Reproduce();
-					}
+					if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(InfoDisplay::selectedObject.lock()))
+						agent->Reproduce();
+					//GameManager::Reset();
+					break;
+
+
+
+				case ALLEGRO_KEY_N:
+					if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(InfoDisplay::selectedObject.lock()))
+						agent->MutateAddNode();
 					break;
 
 				case ALLEGRO_KEY_M:
-					if (!InfoDisplay::selectedObject.expired()) {
-						if (InfoDisplay::selectedObject.lock()->GetType() == "agent")
-							dynamic_cast<Agent*>(InfoDisplay::selectedObject.lock().get())->Mutate();
-					}
+					if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(InfoDisplay::selectedObject.lock()))
+						agent->MutateRemoveNode();
 					break;
+
+				case ALLEGRO_KEY_C:
+					if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(InfoDisplay::selectedObject.lock()))
+						agent->MutateAddConnection();
+					break;
+
 
 				case ALLEGRO_KEY_S:
 					for (int i = 0; i < 100; i++)
@@ -100,17 +106,15 @@ int main() {
 					break;
 
 				case ALLEGRO_KEY_PGDN:
-					speed--;
-					if (speed < 1)
-						speed = 1;
+					GameManager::DecreaseSpeed();
 					break;
 
 				case ALLEGRO_KEY_PGUP:
-					speed++;
+					GameManager::IncreaseSpeed();
 					break;
 
 				case ALLEGRO_KEY_HOME:
-					speed = 1;
+					GameManager::ResetSpeed();
 					break;
 			}
 
@@ -139,7 +143,8 @@ int main() {
 					shared_ptr<Object> clickedObject = GameManager::collisionGrid.GetCollidingObject(worldPos);
 					Camera::FollowObject(clickedObject);
 					InfoDisplay::SelectObject(clickedObject);
-
+					if (clickedObject)
+						clickedObject->Print();
 				}
 				if (ev.mouse.button == 2)
 					UserInput::StartDragging(Vector2f(ev.mouse.x, ev.mouse.y));
@@ -158,17 +163,18 @@ int main() {
 			
 			if (al_get_time() - lastRedrawTime > maxRedrawTime) {
 				cout << "Last redraw was more than " << maxRedrawTime << " seconds ago" << endl;
-				cout << "Clearing event queue and lowering speed to " << (speed > 1 ? speed - 1 : 1) << endl;
-				if (speed > 1)
-					speed--;
+				cout << "Clearing event queue and lowering speed to " << (GameManager::GetSpeed() > 1 ? GameManager::GetSpeed() - 1 : 1) << endl;
+
+				if (GameManager::GetSpeed() == 1) {
+					GameManager::TogglePaused();
+					cout << "MAJOR LAG DETECTED. paused sim" << endl;
+				}
+
+				GameManager::DecreaseSpeed();
 				al_flush_event_queue(event_queue);
-				forceRedraw = true;
 			}
 			else {
-				if (!paused) {
-					for (unsigned i = 0; i < speed; i++)
-						GameManager::Update();
-				}
+				GameManager::Update();
 			}
 		}
 

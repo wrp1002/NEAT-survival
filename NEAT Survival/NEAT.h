@@ -15,6 +15,7 @@ private:
 	vector<shared_ptr<Node>> outputNodes;
 	vector<shared_ptr<Node>> hiddenNodes;
 	vector<shared_ptr<Connection>> connections;
+	int currentNodeID = 0;
 
 	//const double PROBABILITY_MUTATE_REMOVE_CONNECTION = 0.1;
 	const double PROBABILITY_MUTATE_WEIGHT_SHIFT = 0.5;
@@ -58,4 +59,6 @@ public:
 	void MutateAddConnection();
 	void MutateAddNode();
 	void MutateRemoveNode();
+
+	int GetCurrentNodeID();
 };

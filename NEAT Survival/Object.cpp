@@ -4,12 +4,15 @@ Object::Object() : pos(0,0), vel(0,0), acc(0,0) {
 	this->radius = 0;
 	this->prevPos = pos;
 	alive = true;
+
+	SetColor(al_map_rgb(255, 0, 255));
 }
 
 Object::Object(float x, float y, float radius) : pos(x, y), vel(0, 0), acc(0, 0) {
 	this->radius = radius;
 	this->prevPos = pos;
 	alive = true;
+	SetColor(al_map_rgb(255, 0, 255));
 	//cout << "Object init()!" << endl;
 }
 
@@ -62,6 +65,11 @@ void Object::Print() {
 	cout << "OBject" << endl;
 }
 
+void Object::SetColor(ALLEGRO_COLOR newColor) {
+	color = newColor;
+	al_unmap_rgb_f(color, &colorRGB[0], &colorRGB[1], &colorRGB[2]);
+}
+
 
 float Object::GetAngleTo(shared_ptr<Object> other) {
 	return GetAngleTo(other->GetPos());
@@ -94,6 +102,38 @@ float Object::GetRadius() {
 
 double Object::GetEnergy() {
 	return 0.0;
+}
+
+float Object::GetHue() {
+	float r, g, b;
+	float hue, saturation, lightness;
+	al_unmap_rgb_f(color, &r, &g, &b);
+	al_color_rgb_to_hsl(r, g, b, &hue, &saturation, &lightness);
+	return hue;
+}
+
+float Object::GetLightness() {
+	float r, g, b;
+	float hue, saturation, lightness;
+	al_unmap_rgb_f(color, &r, &g, &b);
+	al_color_rgb_to_hsl(r, g, b, &hue, &saturation, &lightness);
+	return lightness;
+}
+
+float* Object::GetRGB() {
+	return colorRGB;
+}
+
+float Object::GetR() {
+	return colorRGB[0];
+}
+
+float Object::GetG() {
+	return colorRGB[1];
+}
+
+float Object::GetB() {
+	return colorRGB[2];
 }
 
 void Object::SetAlive(bool a) {

@@ -11,12 +11,12 @@ void NEAT::_RemoveNode(vector<shared_ptr<Node>>* nodes, shared_ptr<Node> nodeToR
 
 NEAT::NEAT(vector<string> inputLabels, vector<string> outputLabels) {
 	for (string label : inputLabels) {
-		shared_ptr<Node> inputNode = make_shared<Node>(Node(0, float(inputNodes.size()) / inputLabels.size(), Node::INPUT, allNodes.size(), label));
+		shared_ptr<Node> inputNode = make_shared<Node>(Node(0, float(inputNodes.size()) / inputLabels.size(), Node::INPUT, currentNodeID, label));
 		AddNode(inputNode);
 	}
 
 	for (string label : outputLabels) {
-		shared_ptr<Node> outputNode = make_shared<Node>(Node(1, float(outputNodes.size()) / outputLabels.size(), Node::OUTPUT, allNodes.size(), label));
+		shared_ptr<Node> outputNode = make_shared<Node>(Node(1, float(outputNodes.size()) / outputLabels.size(), Node::OUTPUT, currentNodeID, label));
 		AddNode(outputNode);
 	}
 }
@@ -33,9 +33,26 @@ shared_ptr<NEAT> NEAT::Copy() {
 	vector<shared_ptr<Node>> newNodes;
 
 	for (unsigned int i = 0; i < allNodes.size(); i++) {
-		shared_ptr<Node>node = allNodes[i];
-		shared_ptr<Node>newNode = make_shared<Node>(Node(*node));
+		shared_ptr<Node> node = allNodes[i];
+		shared_ptr<Node> newNode = make_shared<Node>(Node(node->GetPos().x, node->GetPos().y, node->GetType(), node->GetID(), node->GetName()));
 		newNode->ClearConnections();
+
+		for (unsigned j = 0; j < newNodes.size(); j++) {
+			if (newNodes[j]->GetID() == newNode->GetID()) {
+				cout << "allnodes: " << endl;
+				for (unsigned i = 0; i < allNodes.size(); i++)
+					allNodes[i]->Print();
+
+				cout << "new nodes:" << endl;
+				for (unsigned i = 0; i < newNodes.size(); i++)
+					newNodes[i]->Print();
+
+				nn->PrintNN();
+				cout << "TWO ID" << endl;
+				newNode->Print();
+
+			}
+		}
 
 		nn->AddNode(newNode);
 		newNodes.push_back(newNode);
@@ -63,6 +80,13 @@ shared_ptr<NEAT> NEAT::Copy() {
 
 			if (fromNode && toNode) {
 				shared_ptr<Connection> newConnection = make_shared<Connection>(Connection(fromNode, toNode));
+
+				// Not sure why this happens. this is kinda just a band aid
+				if (nn->ConnectionExists(newConnection)) {
+					//nn->PrintNN();
+					//cout << "Connection exists!!!  " << fromID << " --> " << toID << endl;
+					continue;
+				}
 				nn->AddConnection(newConnection);
 				newConnection->SetWeight(connection->GetWeight());
 			}
@@ -86,16 +110,16 @@ vector<shared_ptr<Connection>> NEAT::GetConnections() {
 
 void NEAT::PrintNN() {
 	cout << "nodes:" << allNodes.size() << " input:" << inputNodes.size() << " output:" << outputNodes.size() << endl;
-	/*
+	
 	for (auto node : allNodes) {
-		cout << "node " << node->GetID() << " type:" << node->GetType() << endl;
-		cout << "connections:" << node->allConnections.size() << " toConnections:" << node->toConnections.size() << " fromConnections:" << node->fromConnections.size() << endl;
-		for (auto connection : node->allConnections) {
+		cout << "node " << node->GetID() << " type:" << node->GetType() << " X:" << node->GetPos().x << " Y:" << node->GetPos().y << endl;
+		cout << "connections:" << node->GetAllConnections().size() << " toConnections:" << node->GetToConnections().size() << " fromConnections:" << node->GetFromConnections().size() << endl;
+		for (auto connection : node->GetAllConnections()) {
 			cout << connection->GetFrom()->GetID() << " --> " << connection->GetTo()->GetID() << endl;
 		}
 		cout << endl;
 	}
-	*/
+	
 	cout << endl;
 	cout << "connections:" << connections.size() << endl;
 	for (auto connection : connections) {
@@ -106,8 +130,10 @@ void NEAT::PrintNN() {
 vector<double> NEAT::Calculate(vector<double> inputs) {
 	vector<double> outputs;
 
-	if (inputs.size() != inputNodes.size())
+	if (inputs.size() != inputNodes.size()) {
+		cout << "input nodes:" << inputNodes.size() << " given inputs:" << inputs.size() << endl;
 		throw exception("Input sizes don't match!");
+	}
 
 	for (unsigned i = 0; i < inputs.size(); i++)
 		inputNodes[i]->SetOutput(inputs[i]);
@@ -134,6 +160,8 @@ vector<double> NEAT::GetOutputs() {
 }
 
 void NEAT::AddNode(shared_ptr<Node> node) {
+	currentNodeID++;
+
 	if (node->GetType() == Node::INPUT)
 		inputNodes.push_back(node);
 	else if (node->GetType() == Node::OUTPUT)
@@ -170,6 +198,7 @@ void NEAT::RemoveNode(shared_ptr<Node> node) {
 			RemoveNode(otherNode);
 	}
 
+	node->ClearConnections();
 	_RemoveNode(&allNodes, node);
 	_RemoveNode(&inputNodes, node);
 	_RemoveNode(&hiddenNodes, node);
@@ -242,18 +271,15 @@ void NEAT::Mutate() {
 	}
 
 	
-	if (Globals::Random() < PROBABILITY_MUTATE_ADD_CONNECTION * MUTATE_COEF) {
+	if (Globals::Random() < PROBABILITY_MUTATE_ADD_CONNECTION * MUTATE_COEF)
 		MutateAddConnection();
-	}
 	
-	if (Globals::Random() < PROBABILITY_MUTATE_ADD_NODE * MUTATE_COEF) {
+	if (Globals::Random() < PROBABILITY_MUTATE_ADD_NODE * MUTATE_COEF)
 		MutateAddNode();
-	}
 	
 	
-	if (Globals::Random() < PROBABILITY_MUTATE_REMOVE_NODE * MUTATE_COEF) {
-		MutateRemoveNode();
-	}
+	//if (Globals::Random() < PROBABILITY_MUTATE_REMOVE_NODE * MUTATE_COEF) 
+	//	MutateRemoveNode();
 }
 
 
@@ -299,7 +325,7 @@ void NEAT::MutateAddNode() {
 	Vector2f toPos = toNode->GetPos();
 	
 	// create new node at center of connection
-	shared_ptr<Node> newNode = make_shared<Node>(Node((fromPos.x + toPos.x) / 2, (fromPos.y + toPos.y) / 2 + (Globals::Random() * 0.2) - 0.1, Node::HIDDEN, allNodes.size(), "Hidden Node"));
+	shared_ptr<Node> newNode = make_shared<Node>(Node((fromPos.x + toPos.x) / 2, (fromPos.y + toPos.y) / 2 + (Globals::Random() * 0.2) - 0.1, Node::HIDDEN, currentNodeID, "Hidden Node"));
 	AddNode(newNode);
 
 	RemoveConnection(connection);
@@ -317,5 +343,9 @@ void NEAT::MutateRemoveNode() {
 
 	shared_ptr<Node> node = hiddenNodes[rand() % hiddenNodes.size()];
 	RemoveNode(node);
+}
+
+int NEAT::GetCurrentNodeID() {
+	return currentNodeID;
 }
 
