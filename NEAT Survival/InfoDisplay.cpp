@@ -3,7 +3,7 @@
 ALLEGRO_DISPLAY* InfoDisplay::display = nullptr;
 ALLEGRO_EVENT_QUEUE* InfoDisplay::event_queue = nullptr;
 weak_ptr<Object> InfoDisplay::selectedObject;
-Vector2f InfoDisplay::screenSize(400, 400);
+Vector2f InfoDisplay::screenSize(400, 600);
 Vector2f InfoDisplay::mousePos(0, 0);
 
 void InfoDisplay::Show() {
@@ -44,9 +44,11 @@ void InfoDisplay::Draw() {
 		format("Objects: {}", GameManager::allObjects.size()),
 		format("Agents: {}", GameManager::agents.size()),
 
-		format("Total En: {:.2f}", GameManager::GetTotalEnergy()),
+		format("Sim Time: {}", GameManager::GetSimTicksStr()),
 		format("Speed: {}x", GameManager::GetSpeed()),
-		format("Time: {}", GameManager::GetSimTimeStr()),
+		format("Real Time: {}", GameManager::GetSimTimeStr()),
+		
+		format("Total En: {:.2f}", GameManager::GetTotalEnergy()),
 	});
 
 
@@ -61,12 +63,11 @@ void InfoDisplay::Draw() {
 		if (shared_ptr<Agent> selectedAgent = dynamic_pointer_cast<Agent>(object)) {
 			infoText.insert(infoText.end(), {
 				format("Generation: {}", selectedAgent->GetGeneration()),
-				format("Health: {}%", int(selectedAgent->GetHealthPercent() * 100)),
+				format("Health: {:.2f}%", selectedAgent->GetHealthPercent() * 100),
 				format("Age: {:.2f}", selectedAgent->GetAge())
 			});
 
 			infoText.insert(infoText.end(), {
-				"",
 				"",
 				"",
 				DrawNN(selectedAgent->GetNN()),
@@ -123,7 +124,7 @@ string InfoDisplay::DrawNN(shared_ptr<NEAT> nn) {
 
 		if (hovering) {
 			al_draw_filled_circle(realPos.x, realPos.y, nodeSize + 1, al_map_rgb(255, 255, 255));
-			selectedNodeName = node->GetName();
+			selectedNodeName = format("{} ({})", node->GetName(), node->GetActivationFunctionStr());
 		}
 
 		al_draw_filled_circle(realPos.x, realPos.y, nodeSize, al_map_rgb(100 - (node->GetOutput() * 100), 100 + (node->GetOutput() * 100), 0));

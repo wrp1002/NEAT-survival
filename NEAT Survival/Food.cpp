@@ -26,7 +26,7 @@ Food::Food(Vector2f startingPos, double startingEnergy, int newType) : Object(st
 	pos.x += Globals::Random() * 5 - 2.5;
 	pos.y += Globals::Random() * 5 - 2.5;
 
-	float randVel = 10;
+	float randVel = 20;
 	vel.x += Globals::Random() * randVel - randVel / 2;
 	vel.y += Globals::Random() * randVel - randVel / 2;
 
@@ -37,7 +37,6 @@ Food::Food(Vector2f startingPos, double startingEnergy, int newType) : Object(st
 	else if (foodType == MEAT)
 		ConvertToMeat();
 	
-
 	//cout << "New food" << pos.x << pos.y << endl;
 }
 
@@ -50,6 +49,9 @@ void Food::Update() {
 				ConvertToFood();
 		}
 	}
+	if (energy <= 0)
+		alive = false;
+
 	Object::Update();
 }
 
@@ -71,4 +73,10 @@ bool Food::IsWaste() {
 
 bool Food::IsMeat() {
 	return foodType == MEAT;
+}
+
+void Food::SetEnergy(double newEnergy) {
+	energy = newEnergy;
+	if (energy <= 0)
+		alive = false;
 }

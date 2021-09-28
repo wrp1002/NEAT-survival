@@ -16,7 +16,6 @@ private:
 	weak_ptr<Agent> parentPtr;
 	weak_ptr<Object> viewedObject;
 	Vector2f pos;
-	Vector2f endPos;
 	float viewedObjectDistance;
 	float viewDistance;
 	float dir;
@@ -33,7 +32,8 @@ private:
 public:
 	Eye(weak_ptr<Agent> parent, float viewDistance, float dir);
 
-	void Update(vector<shared_ptr<Object>> nearbyObjects, float newMovementPercent);
+	void UpdatePosition();
+	void Update(vector<shared_ptr<Object>> nearbyObjects);
 	void Draw();
 
 	float GetDistanceScaled();

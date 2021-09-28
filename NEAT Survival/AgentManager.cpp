@@ -7,12 +7,13 @@ vector<shared_ptr<Agent>> GameManager::agents;
 vector<shared_ptr<Food>> GameManager::allFood;
 weak_ptr<Agent> GameManager::player;
 CollisionGrid GameManager::collisionGrid;
-unsigned GameManager::startingFood = 300;
+unsigned GameManager::startingFood = 500;
 unsigned GameManager::startingAgents = 200;
 unsigned GameManager::speed = 1;
 bool GameManager::paused = false;
 double GameManager::simStartTime = 0;
-int GameManager::startingMutations = 15;
+double GameManager::simTicks = 0;
+int GameManager::startingMutations = 20;
 
 shared_ptr<Agent> GameManager::SpawnAgent(float x, float y) {
 	vector<string> inputLabels = { 
@@ -32,16 +33,15 @@ shared_ptr<Agent> GameManager::SpawnAgent(float x, float y) {
 		"# nearby food",
 		"# nearby waste",
 		"# nearby agents",
-
-		"eye1 dist",
-		"eye1 r",
-		"eye1 g",
-		"eye1 b",
-		"eye2 dist",
-		"eye2 r",
-		"eye2 g",
-		"eye2 b",
+		"can bite",
+		"object in mouth",
 	};
+	for (int i = 1; i <= 2; i++) {
+		inputLabels.push_back(format("eye{} dist", i));
+		inputLabels.push_back(format("eye{} r", i));
+		inputLabels.push_back(format("eye{} g", i));
+		inputLabels.push_back(format("eye{} b", i));
+	}
 	vector<string> outputLabels = {
 		"forward speed",
 		"turn",
@@ -49,6 +49,7 @@ shared_ptr<Agent> GameManager::SpawnAgent(float x, float y) {
 		"wants to heal",
 		"mem1",
 		"mem1 en",
+		"wants to eat",
 	};
 
 	shared_ptr<Agent> agent = make_shared<Agent>(Agent(x, y, 10, inputLabels, outputLabels));
@@ -176,6 +177,8 @@ void GameManager::Update() {
 		duration = duration_cast<microseconds>(stop - start);
 		if (timeOutput)
 			cout << "cleanup took " << duration.count() << " microseconds" << endl << endl;
+
+		simTicks++;
 	}
 }
 
@@ -204,8 +207,10 @@ double GameManager::GetTotalEnergy() {
 	double total = 0;
 	for (auto object : allObjects) {
 		total += object->GetEnergy();
-		if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(object))
+		if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(object)) {
 			total += agent->GetWaste();
+			total += agent->GetHealth();
+		}
 	}
 	return total;
 }
@@ -216,6 +221,22 @@ double GameManager::GetSimTime() {
 
 string GameManager::GetSimTimeStr() {
 	double simTime = GameManager::GetSimTime();
+	string simTimeLabel = "sec";
+
+	if (simTime > 3600) {
+		simTime /= 3600;
+		simTimeLabel = "hr";
+	}
+	else if (simTime > 60) {
+		simTime /= 60;
+		simTimeLabel = "min";
+	}
+
+	return format("{:.2f} {}", simTime, simTimeLabel);
+}
+
+string GameManager::GetSimTicksStr() {
+	double simTime = simTicks / 60;
 	string simTimeLabel = "sec";
 
 	if (simTime > 3600) {
@@ -259,6 +280,7 @@ void GameManager::Reset() {
 
 	cout << "Reset simulation after " << GetSimTimeStr() << endl;
 	simStartTime = al_get_time();
+	simTicks = 0;
 }
 
 

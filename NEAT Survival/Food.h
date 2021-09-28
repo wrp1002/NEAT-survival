@@ -26,6 +26,8 @@ public:
 	void Update();
 	void Draw();
 
+	void SetEnergy(double newEnergy);
+
 	double GetEnergy();
 	bool IsFood();
 	bool IsWaste();

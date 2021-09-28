@@ -28,17 +28,21 @@ Eye::Eye(weak_ptr<Agent> parent, float viewDistance, float deltaDir) {
 	this->movementPercent = 1.0;
 }
 
-void Eye::Update(vector<shared_ptr<Object>> nearbyObjects, float newMovementPercent) {
+void Eye::UpdatePosition() {
 	shared_ptr<Agent> parent = parentPtr.lock();
-	if (!parent)
+	if (!parent) {
+		cout << "eye tried to update position with null parent" << endl;
 		return;
+	}
 
-	movementPercent = newMovementPercent;
 	dir = parent->GetDir() + deltaDir * movementPercent;
-	pos = parent->GetPos() + Vector2f::FromDir(dir, 1) * parent->GetRadius();
-	endPos = pos + Vector2f::FromDir(dir, 1) * viewDistance;
+	pos = parent->GetPos() + Vector2f::FromDir(dir, parent->GetRadius());
+}
 
+void Eye::Update(vector<shared_ptr<Object>> nearbyObjects) {
+	//movementPercent = newMovementPercent;
 	float minDistance = viewDistance;
+	Vector2f endPos = pos + Vector2f::FromDir(dir, viewDistance);
 	viewedObject.reset();
 	viewedObjectDistance = viewDistance;
 	viewedHue = 0;
@@ -61,7 +65,6 @@ void Eye::Update(vector<shared_ptr<Object>> nearbyObjects, float newMovementPerc
 	}
 
 	if (!viewedObject.expired()) {
-		endPos = pos + Vector2f::FromDir(dir, minDistance);
 		viewedObjectDistance = minDistance;
 		shared_ptr<Object> obj = viewedObject.lock();
 		viewedHue = obj->GetHue();
@@ -73,8 +76,11 @@ void Eye::Update(vector<shared_ptr<Object>> nearbyObjects, float newMovementPerc
 }
 
 void Eye::Draw() {
-	al_draw_filled_circle(pos.x, pos.y, 3, al_map_rgb(0, 255, 0));
-	al_draw_line(pos.x, pos.y, endPos.x, endPos.y, al_map_rgb(100, 100, 100), 2);
+	Vector2f endPos = pos + Vector2f::FromDir(dir, viewedObjectDistance);
+	al_draw_line(pos.x, pos.y, endPos.x, endPos.y, al_map_rgba(100, 100, 100, 0.5), 2);
+	al_draw_filled_circle(pos.x, pos.y, 2, al_map_rgb(0, 255, 0));
+	Vector2f pupilPos = pos + Vector2f::FromDir(dir, 0.5);
+	al_draw_filled_circle(pupilPos.x, pupilPos.y, 1, al_map_rgb(50, 50, 50));
 }
 
 float Eye::GetDistanceScaled() {

@@ -10,11 +10,26 @@ void Node::_RemoveConnection(shared_ptr<Connection> connection, vector<shared_pt
 	}
 }
 
-Node::Node(float x, float y, int type, int ID, string name) : pos(x, y) {
+double Node::Tanh(double input) {
+	return tanh(input);
+}
+
+double Node::Sigmoid(double input) {
+	return 1 / (1 + exp(-input));	// sigmoid
+}
+
+
+Node::Node(float x, float y, int type, int ID, string name, string activationFuncStr) : pos(x, y) {
 	this->type = type;
 	this->name = name;
 	this->output = 0;
 	this->ID = ID;
+	this->activationFuncStr = activationFuncStr;
+
+	if (activationFuncStr == "sigmoid")
+		this->ActivationFunction = &Node::Sigmoid;
+	else if (activationFuncStr == "tanh")
+		this->ActivationFunction = &Node::Tanh;
 }
 
 
@@ -27,18 +42,20 @@ void Node::Print() {
 }
 
 void Node::Calculate() {
+	/*
+	if (fromConnections.size() == 0) {
+		this->output = (this->*ActivationFunction)(1.0);
+		return;
+	}
+	*/
+
 	double sum = 0;
 	for (auto connection : fromConnections) {
 		if (connection->GetEnabled()) {
 			sum += connection->GetFrom()->GetOutput() * connection->GetWeight();
 		}
 	}
-	this->output = ActivationFunction(sum);
-}
-
-double Node::ActivationFunction(double input) {
-	//return tanh(input);			// tanh
-	return 1 / (1 + exp(-input));	// 
+	this->output = (this->*ActivationFunction)(sum);
 }
 
 void Node::AddConnection(shared_ptr<Connection> connection) {

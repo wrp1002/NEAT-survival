@@ -9,6 +9,8 @@
 #include "AgentManager.h"
 #include "Food.h"
 #include "Eye.h"
+#include "Mouth.h"
+#include "AgentStats.h"
 
 #include <iostream>
 #include <memory>
@@ -19,19 +21,17 @@ class Agent : public Object, public std::enable_shared_from_this<Agent> {
 private:
 	const float accSpeed = 1;
 	const float maxRotationSpeed = 0.1;
-	const double healAmount = 0.2;
 	bool userControlled = false;
 	bool shouldReproduce;
 
-	double energy, maxEnergy;
-	double waste, maxWaste;
-	float health, maxHealth;
 	int digestTime, digestTimeStart;
 
+	AgentStats stats;
 	vector<float> genes;
 	shared_ptr<NEAT> nn;
 	vector<double> memory;
 	vector<shared_ptr<Eye>> eyes;
+	shared_ptr<Mouth> mouth;
 	float eyeSpreadPercent, eyeSpreadMax;
 	float viewDistance;
 	
@@ -39,9 +39,6 @@ private:
 	float dirToFood, dirToAgent;
 	float forwardSpeed, rotationSpeed;
 	int generation;
-
-	double age;
-	double maxAge;
 
 	vector<shared_ptr<Object>> GetNearbyObjects();
 	shared_ptr<Object> GetClosestObjectOfType(vector<shared_ptr<Object>> nearbyObjects, string type);
@@ -71,6 +68,9 @@ public:
 	void SetUserControlled(bool user) { this->userControlled = user; }
 	void SetEnergy(double newEnergy);
 	void SetGeneration(int newGeneration);
+	void AddEnergy(double amount);
+	void SetHealth(double newHealth);
+	void AddWaste(double amount);
 
 	float GetX();
 	float GetY();
@@ -80,8 +80,11 @@ public:
 
 	double GetEnergy();
 	double GetWaste();
+	double GetHealth();
 	float GetEnergyPercent();
 	float GetHealthPercent();
 	float GetAge();
+	float GetDamage();
+	
 };
 

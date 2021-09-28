@@ -29,6 +29,7 @@ namespace GameManager {
     extern unsigned speed;
     extern bool paused;
     extern double simStartTime;
+    extern double simTicks;
     extern int startingMutations;
 
     shared_ptr<Agent> SpawnRandomAgent();
@@ -48,6 +49,7 @@ namespace GameManager {
     double GetTotalEnergy();
     double GetSimTime();
     string GetSimTimeStr();
+    string GetSimTicksStr();
 
     void ResetSpeed();
     void IncreaseSpeed();
