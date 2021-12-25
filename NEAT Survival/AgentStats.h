@@ -3,6 +3,7 @@
 #include <allegro5/allegro.h>
 
 #include <vector>
+#include <iostream>
 
 #include "Globals.h"
 
@@ -10,15 +11,17 @@ using namespace std;
 
 class AgentStats {
 private:
-	float rGene;
-	float gGene;
-	float bGene;
 	float healthGene;
 	float speedGene;
-	float sizeGene;
 	float dietGene;
 
 public:
+	vector<float> genes;
+	float rGene;
+	float gGene;
+	float bGene;
+	float sizeGene;
+
 	double health, maxHealth;
 	double energy, maxEnergy;
 	double waste, maxWaste;
@@ -26,16 +29,25 @@ public:
 	double damage;
 	double healAmount;
 
+	float size;
+	float accSpeed;
 	float age, maxAge;
 
 	ALLEGRO_COLOR color;
 
 	AgentStats();
-	AgentStats(vector<float> genes);
+	void SetGenes(vector<float> newGenes);
 
 	double GetAgePercent();
 	double GetHealthPercent();
 	double GetEnergyPercent();
 	double GetWastePercent();
+
+	void HealthToWaste(double amount);
+	void HealthToEnergy(double amount);
+	void WasteToHealth(double amount);
+	void WasteToEnergy(double amount);
+	void EnergyToWaste(double amount);
+	void EnergyToHealth(double amount);
 };
 

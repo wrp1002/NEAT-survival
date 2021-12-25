@@ -11,6 +11,8 @@
 #include "Eye.h"
 #include "Mouth.h"
 #include "AgentStats.h"
+#include "GameRules.h"
+#include "TriangleEye.h"
 
 #include <iostream>
 #include <memory>
@@ -19,7 +21,6 @@ using namespace std;
 
 class Agent : public Object, public std::enable_shared_from_this<Agent> {
 private:
-	const float accSpeed = 1;
 	const float maxRotationSpeed = 0.1;
 	bool userControlled = false;
 	bool shouldReproduce;
@@ -27,15 +28,14 @@ private:
 	int digestTime, digestTimeStart;
 
 	AgentStats stats;
-	vector<float> genes;
 	shared_ptr<NEAT> nn;
 	vector<double> memory;
-	vector<shared_ptr<Eye>> eyes;
+	//vector<shared_ptr<Eye>> eyes;
+	vector<shared_ptr<TriangleEye>> eyes;
 	shared_ptr<Mouth> mouth;
 	float eyeSpreadPercent, eyeSpreadMax;
 	float viewDistance;
 	
-	float dir;
 	float dirToFood, dirToAgent;
 	float forwardSpeed, rotationSpeed;
 	int generation;
@@ -74,7 +74,6 @@ public:
 
 	float GetX();
 	float GetY();
-	float GetDir();
 	shared_ptr<NEAT> GetNN();
 	int GetGeneration();
 

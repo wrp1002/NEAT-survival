@@ -24,7 +24,9 @@ AgentStats::AgentStats() {
 	color = al_map_rgb_f(rGene, gGene, bGene);
 }
 
-AgentStats::AgentStats(vector<float> genes) {
+void AgentStats::SetGenes(vector<float> newGenes) {
+	genes = newGenes;
+
 	rGene = 0;
 	gGene = 0;
 	bGene = 0;
@@ -45,7 +47,27 @@ AgentStats::AgentStats(vector<float> genes) {
 
 	age = 0;
 	maxAge = 60.0 * 5;
-	color = al_map_rgb_f(rGene, gGene, bGene);
+
+
+	// Apply color genes: 0-2
+	rGene = genes[0];
+	gGene = genes[1];
+	bGene = genes[2];
+
+	// Size gene: 3
+	sizeGene = genes[3];
+	maxHealth = sizeGene * 200.0;
+	maxEnergy = sizeGene * 200.0;
+	size = sizeGene * 15.0 + 5;
+	damage = sizeGene * 20.0;
+	
+	health = maxHealth / 2;
+	energy = maxEnergy / 2;
+
+
+	// Speed gene: 4
+	speedGene = genes[4];
+	accSpeed = speedGene + 0.5;
 }
 
 
@@ -63,5 +85,35 @@ double AgentStats::GetEnergyPercent() {
 
 double AgentStats::GetWastePercent() {
 	return waste / maxWaste;
+}
+
+void AgentStats::HealthToWaste(double amount) {
+	health -= amount;
+	waste += amount;
+}
+
+void AgentStats::HealthToEnergy(double amount) {
+	health -= amount;
+	energy += amount;
+}
+
+void AgentStats::WasteToHealth(double amount) {
+	waste -= amount;
+	health += amount;
+}
+
+void AgentStats::WasteToEnergy(double amount) {
+	waste -= amount;
+	energy += amount;
+}
+
+void AgentStats::EnergyToWaste(double amount) {
+	energy -= amount;
+	waste += amount;
+}
+
+void AgentStats::EnergyToHealth(double amount) {
+	energy -= amount;
+	health += amount;
 }
 

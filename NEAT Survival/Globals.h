@@ -9,7 +9,7 @@ using namespace std;
 namespace Globals {
 	const int screenWidth = 1000;
 	const int screenHeight = 800;
-	const int mapSize = 15000;
+	const int mapSize = 10000;
 	const int mapWidth = mapSize;
 	const int mapHeight = mapSize;
 	const string resourcesDir = "Resources/";

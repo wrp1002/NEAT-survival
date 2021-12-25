@@ -23,6 +23,7 @@ protected:
 	float radius;
 	float velX = 0;
 	float velY = 0;
+	float dir;
 	const float dragCoef = 0.85;
 	string objectType = "object";
 	bool alive;
@@ -49,6 +50,7 @@ public:
 
 	Vector2f GetPos();
 	Vector2f GetPrevPos();
+	float GetDir();
 	string GetType();
 	float GetRadius();
 	virtual double GetEnergy();

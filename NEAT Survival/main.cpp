@@ -13,6 +13,7 @@
 #include "Camera.h"
 #include "Vector2f.h"
 #include "Font.h"
+#include "GameRules.h"
 
 using namespace std;
 
@@ -116,9 +117,16 @@ int main() {
 				case ALLEGRO_KEY_HOME:
 					GameManager::ResetSpeed();
 					break;
+
+				case ALLEGRO_KEY_ENTER:
+					GameRules::GameRulePrompt();
+					al_flush_event_queue(event_queue);
+					lastRedrawTime = al_get_time();
+					break;
 			}
 
 			UserInput::SetPressed(ev.keyboard.keycode, true);
+
 		}
 		else if (ev.type == ALLEGRO_EVENT_KEY_UP) {
 			UserInput::SetPressed(ev.keyboard.keycode, false);
@@ -175,6 +183,12 @@ int main() {
 			}
 			else {
 				GameManager::Update();
+
+				if (Camera::followObject.expired() && GameRules::IsRuleEnabled("FollowRandomAgent")) {
+					shared_ptr<Object> followObj = GameManager::GetRandomAgent();
+					Camera::FollowObject(followObj);
+					InfoDisplay::SelectObject(followObj);
+				}
 			}
 		}
 
@@ -201,6 +215,7 @@ int main() {
 
 	}
 
+	GameManager::Shutdown();
 	al_destroy_display(display);
 	al_destroy_display(InfoDisplay::display);
 	al_destroy_event_queue(event_queue);

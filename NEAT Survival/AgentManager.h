@@ -3,15 +3,14 @@
 #include <vector>
 #include <iostream>
 #include <chrono>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
+#include <functional>
 
 #include "Globals.h"
 #include "NEAT.h"
 #include "Object.h"
 #include "CollisionGrid.h"
 #include "Food.h"
+#include "ThreadPool.h"
 
 class Agent;
 
@@ -24,6 +23,7 @@ namespace GameManager {
     extern vector<shared_ptr<Food>> allFood;
     extern weak_ptr<Agent> player;
     extern CollisionGrid collisionGrid;
+    extern ThreadPool threadPool;
     extern unsigned startingFood;
     extern unsigned startingAgents;
     extern unsigned speed;
@@ -50,6 +50,7 @@ namespace GameManager {
     double GetSimTime();
     string GetSimTimeStr();
     string GetSimTicksStr();
+    shared_ptr<Agent> GetRandomAgent();
 
     void ResetSpeed();
     void IncreaseSpeed();
@@ -60,8 +61,11 @@ namespace GameManager {
     bool IsPaused();
 
     void Update();
+    void UpdateObject(shared_ptr<Object> obj);
+    void HandleCollision(int x, int y);
     void Draw();
     void CleanupObjects();
     void Reset();
 
+    void Shutdown();
 };

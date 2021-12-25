@@ -7,6 +7,7 @@
 #include "Globals.h"
 #include "Object.h"
 #include "Food.h"
+#include "GameRules.h"
 
 class Agent;
 

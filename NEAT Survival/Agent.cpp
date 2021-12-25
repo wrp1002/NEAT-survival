@@ -17,12 +17,12 @@ void Agent::Init() {
 
 	// create eyes
 	viewDistance = 250.0;
+	eyeSpreadMax = M_PI / 8;
+	float offsetInterval = M_PI / 5;
 	eyes.clear();
-	eyeSpreadMax = M_PI / 6;
-	eyeSpreadPercent = 1.0;
-	eyes.push_back(make_shared<Eye>(Eye(shared_from_this(), viewDistance, -eyeSpreadMax)));
-	//eyes.push_back(make_shared<Eye>(Eye(shared_from_this(), viewDistance, 0)));
-	eyes.push_back(make_shared<Eye>(Eye(shared_from_this(), viewDistance,  eyeSpreadMax)));
+	for (float offset = -offsetInterval; offset <= offsetInterval; offset += offsetInterval)
+		eyes.push_back(make_shared<TriangleEye>(TriangleEye(eyeSpreadMax, viewDistance, offset, shared_from_this())));
+
 
 	// create mouth
 	mouth = make_shared<Mouth>(Mouth(shared_from_this(), 7));
@@ -56,7 +56,7 @@ Agent::~Agent() {
 
 void Agent::Update() {
 	if (!alive) {
-		cout <<" tried update but not alive'" << endl;
+		//cout <<" tried update but not alive'" << endl;
 		return;
 	}
 
@@ -77,49 +77,15 @@ void Agent::Update() {
 	}
 
 
-	// dir to closest objects 
-	//shared_ptr<Object> closestFood = GetClosestObjectOfType(nearbyObjects, "food");
-	//shared_ptr<Object> closestAgent = GetClosestObjectOfType(nearbyObjects, "agent");
-
-	/*
-	float distanceToFood = viewDistance;
-	float foodDeltaDir = 0;
-	dirToFood = dir;
-	if (closestFood != nullptr) {
-		distanceToFood = pos.GetDistance(closestFood->GetPos());
-		dirToFood = GetAngleTo(closestFood);
-		foodDeltaDir = atan2(sin(dirToFood - dir), cos(dirToFood - dir));
-		//cout << "dir: " << dir << " Food dir:" << foodDir << " delta:" << foodDeltaDir << endl;
-	}
-
-	float distanceToAgent = viewDistance;
-	float agentDeltaDir = 0;
-	dirToAgent = dir;
-	if (closestAgent != nullptr) {
-		distanceToAgent = pos.GetDistance(closestAgent->GetPos());
-		dirToAgent = GetAngleTo(closestAgent);
-		agentDeltaDir = atan2(sin(dirToAgent - dir), cos(dirToAgent - dir));
-		//cout << "dir: " << dir << " Food dir:" << foodDir << " delta:" << foodDeltaDir << endl;
-	}
-	*/
-
-
-
 	for (auto eye : eyes)
 		eye->Update(nearbyObjects);
 	mouth->Update(nearbyObjects);
 
 	// Get output from NN
 	vector<double> inputs = {
-		//foodDeltaDir,						// direction to closest food
-		//double(closestFood != nullptr),	// sees food
-		//agentDeltaDir,					// dir to closest agent
-		//double(closestAgent != nullptr),	// sees agent
-		//distanceToFood / viewDistance,
-		//distanceToAgent / viewDistance,
 		1.0,								// const
-		sin(al_get_time()),					// sin
-		double(sin(al_get_time()) > 0),		// tick
+		sin(stats.age),						// sin
+		double(sin(stats.age) > 0),				// tick
 		stats.GetAgePercent(),				// age
 		stats.GetHealthPercent(),			// health
 		stats.GetEnergyPercent(),			// energy
@@ -128,41 +94,56 @@ void Agent::Update() {
 		nearbyWaste  / 10.0,				// nearby waste
 		nearbyAgents / 10.0,				// nearby objects
 		(double)mouth->CanBite(),			// can bite
-		(double)mouth->ObjectInMouth()		// object in mouth
+		(double)mouth->ObjectInMouth(),		// object in mouth
+		eyeSpreadPercent,					// eye spread
 	};
 	for (auto eye : eyes) {
-		inputs.push_back(eye->GetDistanceScaled());
-		inputs.push_back(eye->GetViewedR());
-		inputs.push_back(eye->GetViewedG());
-		inputs.push_back(eye->GetViewedB());
+		inputs.push_back(1.0 - eye->GetMinDistPercent());
+		inputs.push_back(eye->GetSeenObjectsSize() / 5.0);
+		inputs.push_back(eye->GetAvgR());
+		inputs.push_back(eye->GetAvgG());
+		inputs.push_back(eye->GetAvgB());
 	}
-	
 	vector<double> outputs = nn->Calculate(inputs);
-	
+
+
 	// extract output from NN
-	forwardSpeed = outputs[0] * accSpeed;
-	rotationSpeed = (outputs[1]) * maxRotationSpeed;
-	bool wantToReproduce = outputs[2] > 0.5 || stats.energy > 0.80;
-	bool wantsToHeal = outputs[3] > 0.5;
-	double mem1 = outputs[4];
-	bool mem1Overwrite = outputs[5] > 0.5;
-	bool wantsToEat = outputs[6] > 0.5;
+	forwardSpeed = outputs[0] * stats.accSpeed;
+	rotationSpeed = ( (outputs[1] + 1.0) / 2 - (outputs[2] + 1.0) / 2 ) / 2 * maxRotationSpeed;
+	bool wantToReproduce = outputs[3] > 0.5 || stats.energy > 0.80;
+	bool wantsToHeal = outputs[4] > 0.5;
+	double mem1 = outputs[5];
+	bool mem1Overwrite = outputs[6] > 0.5;
+	bool wantsToEat = outputs[7] > 0.5;
+	bool wantsToBoost = outputs[8] > 0.5;
+	eyeSpreadPercent = (outputs[9] + 1.0) / 2;
 
 	bool shouldReproduce = wantToReproduce && stats.energy > stats.maxEnergy * 0.5;
 
-
-	if (mem1Overwrite) {
-		memory.clear();
-		memory.push_back(mem1);
-	}
-
-
+	// handle user input
 	if (userControlled) {
-		forwardSpeed = accSpeed * (UserInput::IsPressed(ALLEGRO_KEY_UP) - UserInput::IsPressed(ALLEGRO_KEY_DOWN));
+		forwardSpeed = stats.accSpeed * (UserInput::IsPressed(ALLEGRO_KEY_UP) - UserInput::IsPressed(ALLEGRO_KEY_DOWN));
 		rotationSpeed = maxRotationSpeed * UserInput::IsPressed(ALLEGRO_KEY_LEFT) - maxRotationSpeed * UserInput::IsPressed(ALLEGRO_KEY_RIGHT);
 		wantsToEat = UserInput::IsPressed(ALLEGRO_KEY_E);
+		wantsToBoost = UserInput::IsPressed(ALLEGRO_KEY_B);
 	}
+
+	if (mem1Overwrite)
+		memory[0] = mem1;
 	
+
+	if (GameRules::IsRuleEnabled("EyeMovement")) {
+		// update eye angles
+		for (auto eye : eyes)
+			eye->SetSpreadPercent(eyeSpreadPercent);
+		
+	}
+	else {
+		for (auto eye : eyes)
+			eye->SetSpreadPercent(1);
+	}
+
+
 	double energyUsage = 0.005;
 	
 	if (shouldReproduce)
@@ -179,10 +160,11 @@ void Agent::Update() {
 		}
 	}
 
-	energyUsage += abs(outputs[0]) * 0.01;
-	energyUsage += abs(outputs[1]) * 0.01;
+	energyUsage += abs(outputs[0]) * 0.005 * stats.sizeGene * (1.0 + wantsToBoost * 5.0);
+	energyUsage += abs(outputs[1]) * 0.005 * stats.sizeGene;
+	
 
-
+	// energy usage
 	if (energyUsage < stats.energy) {
 		stats.energy -= energyUsage;
 		stats.waste += energyUsage;
@@ -195,18 +177,19 @@ void Agent::Update() {
 	// movement
 	dir += rotationSpeed;
 	dir = fmod(dir, 2 * M_PI);
-
 	acc = Vector2f(cos(dir) * forwardSpeed, -sin(dir) * forwardSpeed);
+	acc *= (1 + wantsToBoost);
 	vel += acc;
 	vel *= dragCoef;
 
 
-	//wantsToEat = true;
-	// mouth 
+	// mouth control
+	if (!GameRules::IsRuleEnabled("MouthControl"))
+		wantsToEat = true;
+	
 	mouth->SetWantsToBite(wantsToEat);
-	if (wantsToEat && mouth->CanBite() && mouth->ObjectInMouth()) {
+	if (wantsToEat && mouth->CanBite() && mouth->ObjectInMouth())
 		mouth->Bite();
-	}
 
 
 	// digestion
@@ -225,8 +208,10 @@ void Agent::Update() {
 	}
 
 	Object::Update();
+
+	// update eye and mouth positions
 	for (auto eye : eyes)
-		eye->UpdatePosition();
+		eye->UpdatePos();
 	mouth->UpdatePosition();
 
 	// aging
@@ -261,10 +246,14 @@ void Agent::Update() {
 void Agent::Draw() {
 	//al_draw_circle(pos.x, pos.y, viewDistance, al_map_rgba(50, 0, 50, 0.5), 2);
 
+	for (auto eye : eyes)
+		eye->DrawTriangle();
+	for (auto eye : eyes)
+		eye->DrawLines();
+
 	mouth->Draw();
 
 	al_draw_filled_circle(pos.x, pos.y, radius, color);
-	
 	
 	int lineLen = radius*2 + forwardSpeed;
 	//al_draw_line(pos.x, pos.y, pos.x + cos(dir) * lineLen, pos.y - sin(dir) * lineLen, al_map_rgb(255, 0, 255), 2);
@@ -272,8 +261,6 @@ void Agent::Draw() {
 	//al_draw_line(pos.x, pos.y, pos.x + cos(dirToFood) * 20, pos.y - sin(dirToFood) * 20, al_map_rgb(0, 255, 0), 2);
 	//al_draw_line(pos.x, pos.y, pos.x + cos(dirToAgent) * 20, pos.y - sin(dirToAgent) * 20, al_map_rgb(255, 0, 0), 2);
 
-	for (auto eye : eyes)
-		eye->Draw();
 }
 
 void Agent::CollisionEvent(shared_ptr<Object> other) {
@@ -295,7 +282,7 @@ void Agent::Reproduce() {
 	shared_ptr<Agent> child = GameManager::SpawnAgent(pos.x, pos.y, newNN);
 	child->Mutate();
 	child->SetGeneration(generation + 1);
-	child->SetGenes(genes);
+	child->SetGenes(stats.genes);
 	child->MutateGenes();
 
 	double childEnergy = stats.energy / 2;
@@ -305,18 +292,15 @@ void Agent::Reproduce() {
 }
 
 void Agent::SetGenes(vector<float> newGenes) {
-	genes = newGenes;
-
-	// Apply color genes 0-2
-	SetColor(al_map_rgb_f(genes[0], genes[1], genes[2]));
-
-	stats = AgentStats(genes);
+	stats.SetGenes(newGenes);
+	SetColor(al_map_rgb_f(stats.rGene, stats.gGene, stats.bGene));
+	radius = stats.size;
 }
 
 void Agent::MutateGenes() {
-	for (unsigned i = 0; i < genes.size(); i++) {
-		genes[i] += Globals::RandomSign() * Globals::Random() * 0.1;
-		genes[i] = Globals::Constrain(genes[i], 0.0, 1.0);
+	for (unsigned i = 0; i < stats.genes.size(); i++) {
+		stats.genes[i] += Globals::RandomSign() * Globals::Random() * 0.1;
+		stats.genes[i] = Globals::Constrain(stats.genes[i], 0.0, 1.0);
 	}
 }
 
@@ -329,7 +313,7 @@ vector<float> Agent::GenerateRandomGenes() {
 }
 
 vector<float> Agent::GetGenes() {
-	return genes;
+	return stats.genes;
 }
 
 void Agent::Mutate() {
@@ -377,10 +361,6 @@ float Agent::GetX() {
 
 float Agent::GetY() {
 	return pos.y;
-}
-
-float Agent::GetDir() {
-	return dir;
 }
 
 shared_ptr<NEAT> Agent::GetNN() {

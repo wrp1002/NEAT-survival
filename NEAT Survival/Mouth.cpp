@@ -15,7 +15,7 @@ Mouth::Mouth(shared_ptr<Agent> parent, float radius) {
 void Mouth::UpdatePosition() {
 	shared_ptr<Agent> parent = parentPtr.lock();
 	this->dir = parent->GetDir();
-	this->pos = parent->GetPos() + Vector2f::FromDir(dir, deltaPos);
+	this->pos = parent->GetPos() + Vector2f::FromDir(dir, parent->GetRadius());
 }
 
 void Mouth::Update(vector<shared_ptr<Object>> nearbyObjects) {
@@ -70,6 +70,9 @@ void Mouth::Bite() {
 			food->SetEnergy(food->GetEnergy() - eatAmount);
 		}
 		else if (food->IsWaste()) {
+			if (!GameRules::IsRuleEnabled("WasteDamage"))
+				return;
+
 			double eatAmount = Globals::Constrain((double)parent->GetDamage(), 0.0, food->GetEnergy());
 			//double usableEnergy = eatAmount * 0.1;
 			double waste = eatAmount;

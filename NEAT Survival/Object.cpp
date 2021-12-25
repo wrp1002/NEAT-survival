@@ -91,6 +91,10 @@ Vector2f Object::GetPrevPos() {
 	return prevPos;
 }
 
+float Object::GetDir() {
+	return dir;
+}
+
 string Object::GetType()
 {
 	return objectType;

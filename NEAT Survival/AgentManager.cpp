@@ -7,6 +7,7 @@ vector<shared_ptr<Agent>> GameManager::agents;
 vector<shared_ptr<Food>> GameManager::allFood;
 weak_ptr<Agent> GameManager::player;
 CollisionGrid GameManager::collisionGrid;
+ThreadPool GameManager::threadPool;
 unsigned GameManager::startingFood = 500;
 unsigned GameManager::startingAgents = 200;
 unsigned GameManager::speed = 1;
@@ -17,12 +18,6 @@ int GameManager::startingMutations = 20;
 
 shared_ptr<Agent> GameManager::SpawnAgent(float x, float y) {
 	vector<string> inputLabels = { 
-		//"dir to food",
-		//"sees food",
-		//"dir to agent",
-		//"sees agent",
-		//"food dist",
-		//"agent dist",
 		"const",
 		"sin",
 		"tick",
@@ -35,21 +30,27 @@ shared_ptr<Agent> GameManager::SpawnAgent(float x, float y) {
 		"# nearby agents",
 		"can bite",
 		"object in mouth",
+		"eye spread",
 	};
-	for (int i = 1; i <= 2; i++) {
-		inputLabels.push_back(format("eye{} dist", i));
-		inputLabels.push_back(format("eye{} r", i));
-		inputLabels.push_back(format("eye{} g", i));
-		inputLabels.push_back(format("eye{} b", i));
+	for (int i = 1; i <= 3; i++) {
+		inputLabels.push_back(format("eye{} min dist", i));
+		inputLabels.push_back(format("eye{} # seen", i));
+		inputLabels.push_back(format("eye{} avg r", i));
+		inputLabels.push_back(format("eye{} avg g", i));
+		inputLabels.push_back(format("eye{} avg b", i));
 	}
+
 	vector<string> outputLabels = {
 		"forward speed",
-		"turn",
+		"turn left",
+		"turn right",
 		"want to reproduce",
 		"wants to heal",
 		"mem1",
 		"mem1 en",
 		"wants to eat",
+		"wants to boost",
+		"eye movement",
 	};
 
 	shared_ptr<Agent> agent = make_shared<Agent>(Agent(x, y, 10, inputLabels, outputLabels));
@@ -143,6 +144,17 @@ void GameManager::Update() {
 			for (unsigned i = 0; i < size; i++)
 				updateThreads[i].join();
 				*/
+			
+			vector <function<void()>> jobs;
+
+			for (unsigned i = 0; i < allObjects.size(); i++)
+				jobs.push_back(bind(&GameManager::UpdateObject, allObjects[i]));
+
+			//cout << jobs.size() << " update jobs" << endl;
+
+			threadPool.AddJobs(jobs);
+
+			//while (threadPool.HasJobs()) {}
 		}
 		else {
 			// not using threads
@@ -161,7 +173,25 @@ void GameManager::Update() {
 
 
 		start = high_resolution_clock::now();
-		collisionGrid.HandleCollisions();
+
+		if (useThreads) {
+			vector <function<void()>> jobs;
+
+			for (int x = 0; x < collisionGrid.GetWidth(); x++) {
+				for (int y = 0; y < collisionGrid.GetHeight(); y++) {
+					jobs.push_back(bind(&GameManager::HandleCollision, x, y));
+				}
+			}
+
+			//cout << jobs.size() << " collision jobs" << endl;
+
+			threadPool.AddJobs(jobs);
+			//while (threadPool.HasJobs()) {}
+		}
+		else
+			collisionGrid.HandleCollisions();
+
+
 		stop = high_resolution_clock::now();
 		duration = duration_cast<microseconds>(stop - start);
 		if (timeOutput)
@@ -180,6 +210,14 @@ void GameManager::Update() {
 
 		simTicks++;
 	}
+}
+
+void GameManager::UpdateObject(shared_ptr<Object> obj) {
+	obj->Update();
+}
+
+void GameManager::HandleCollision(int x, int y) {
+	collisionGrid.HandleCollisionAt(x, y);
 }
 
 void GameManager::DestroyObject(shared_ptr<Object> object) {
@@ -251,6 +289,10 @@ string GameManager::GetSimTicksStr() {
 	return format("{:.2f} {}", simTime, simTimeLabel);
 }
 
+shared_ptr<Agent> GameManager::GetRandomAgent() {
+	return agents[rand() % agents.size()];
+}
+
 
 void GameManager::CleanupObjects() {
 	for (int i = allObjects.size() - 1; i >= 0; i--) {
@@ -308,4 +350,8 @@ void GameManager::TogglePaused() {
 
 bool GameManager::IsPaused() {
 	return paused;
+}
+
+void GameManager::Shutdown() {
+	threadPool.Stop();
 }

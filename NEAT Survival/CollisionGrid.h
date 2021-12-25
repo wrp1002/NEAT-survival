@@ -26,6 +26,7 @@ public:
 
 	void Draw();
 	void HandleCollisions();
+	void HandleCollisionAt(int x, int y);
 	void Clear();
 	void AddObject(shared_ptr<Object> object);
 	void UpdateObjectPosition(shared_ptr<Object> object);
@@ -36,5 +37,7 @@ public:
 	vector<shared_ptr<Object>> GetObjects(int xPos, int yPos, int r);
 	vector<shared_ptr<Object>> GetObjects(Vector2f pos, int r);
 
+	int GetWidth();
+	int GetHeight();
 };
 

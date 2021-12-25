@@ -40,19 +40,23 @@ void CollisionGrid::Draw() {
 void CollisionGrid::HandleCollisions() {
 	for (unsigned x = 0; x < width; x++) {
 		for (unsigned y = 0; y < height; y++) {
-			vector<shared_ptr<Object>> cellObjects = GetObjects(x, y, 1);
+			HandleCollisionAt(x, y);
+		}
+	}
+}
 
-			if (cellObjects.size() < 2)
-				continue;
+void CollisionGrid::HandleCollisionAt(int x, int y) {
+	vector<shared_ptr<Object>> cellObjects = GetObjects(x, y, 1);
 
-			for (unsigned i = 0; i < cellObjects.size() - 1; i++) {
-				for (unsigned j = i + 1; j < cellObjects.size(); j++) {
-					if (cellObjects[i]->CollidesWith(cellObjects[j])) {
-						cellObjects[i]->HandleCollision(cellObjects[j]);
-						cellObjects[i]->CollisionEvent(cellObjects[j]);
-						cellObjects[j]->CollisionEvent(cellObjects[i]);
-					}
-				}
+	if (cellObjects.size() < 2)
+		return;
+
+	for (unsigned i = 0; i < cellObjects.size() - 1; i++) {
+		for (unsigned j = i + 1; j < cellObjects.size(); j++) {
+			if (cellObjects[i]->CollidesWith(cellObjects[j])) {
+				cellObjects[i]->HandleCollision(cellObjects[j]);
+				cellObjects[i]->CollisionEvent(cellObjects[j]);
+				cellObjects[j]->CollisionEvent(cellObjects[i]);
 			}
 		}
 	}
@@ -118,5 +122,13 @@ vector<shared_ptr<Object>> CollisionGrid::GetObjects(Vector2f pos, int r) {
 	int x = pos.x / cellSize;
 	int y = pos.y / cellSize;
 	return GetObjects(x, y, r);
+}
+
+int CollisionGrid::GetWidth() {
+	return width;
+}
+
+int CollisionGrid::GetHeight() {
+	return height;
 }
 

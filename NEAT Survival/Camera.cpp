@@ -8,6 +8,9 @@ weak_ptr<Object> Camera::followObject;
 
 
 void Camera::UpdateTransform() {
+	//if (followObject.expired() && GameRules::IsRuleEnabled("FollowRandomAgent"))
+	//	FollowObject(dynamic_pointer_cast<Object>(GameManager::GetRandomAgent()));
+
 	ALLEGRO_TRANSFORM t;
 	al_identity_transform(&t);
 

@@ -20,7 +20,6 @@ private:
 	float viewDistance;
 	float dir;
 	float deltaDir;
-	float movementPercent;
 	float viewedHue;
 	float viewedLightness;
 	float viewedR;
@@ -33,6 +32,7 @@ public:
 	Eye(weak_ptr<Agent> parent, float viewDistance, float dir);
 
 	void UpdatePosition();
+	void UpdateAngle(float movementPercent);
 	void Update(vector<shared_ptr<Object>> nearbyObjects);
 	void Draw();
 

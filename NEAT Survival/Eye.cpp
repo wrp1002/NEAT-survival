@@ -25,7 +25,6 @@ Eye::Eye(weak_ptr<Agent> parent, float viewDistance, float deltaDir) {
 	this->viewDistance = viewDistance;
 	this->deltaDir = deltaDir;
 	this->dir = 0;
-	this->movementPercent = 1.0;
 }
 
 void Eye::UpdatePosition() {
@@ -35,8 +34,16 @@ void Eye::UpdatePosition() {
 		return;
 	}
 
-	dir = parent->GetDir() + deltaDir * movementPercent;
 	pos = parent->GetPos() + Vector2f::FromDir(dir, parent->GetRadius());
+}
+
+void Eye::UpdateAngle(float movementPercent) {
+	shared_ptr<Agent> parent = parentPtr.lock();
+	if (!parent) {
+		cout << "eye tried to update dir with null parent" << endl;
+		return;
+	}
+	dir = parent->GetDir() + deltaDir * movementPercent;
 }
 
 void Eye::Update(vector<shared_ptr<Object>> nearbyObjects) {
@@ -96,7 +103,7 @@ float Eye::GetViewedLightness() {
 }
 
 float Eye::GetDir() {
-	return deltaDir * movementPercent;
+	return dir;
 }
 
 float Eye::GetViewedR() {
