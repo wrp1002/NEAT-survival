@@ -46,7 +46,7 @@ void InfoDisplay::Draw() {
 
 		format("Sim Time: {}", GameManager::GetSimTicksStr()),
 		format("Speed: {}x", GameManager::GetSpeed()),
-		format("Real Time: {}", GameManager::GetSimTimeStr()),
+		format("R Time: {}", GameManager::GetSimTimeStr()),
 		
 		format("Total En: {:.2f}", GameManager::GetTotalEnergy()),
 	});
@@ -68,7 +68,6 @@ void InfoDisplay::Draw() {
 			});
 
 			infoText.insert(infoText.end(), {
-				"",
 				"",
 				DrawNN(selectedAgent->GetNN()),
 			});
@@ -102,6 +101,7 @@ void InfoDisplay::Draw() {
 
 string InfoDisplay::DrawNN(shared_ptr<NEAT> nn) {
 	string selectedNodeName = "";
+
 	for (auto node : nn->GetNodes()) {
 		Vector2f realPos = CalculateNodePos(node);
 
