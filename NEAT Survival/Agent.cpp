@@ -11,6 +11,7 @@ void Agent::Init() {
 
 	digestTimeStart = 500;
 	digestTime = digestTimeStart;
+	healing = false;
 	
 	// random color for now
 	SetColor(al_map_rgb(Globals::RandomInt(0, 255), Globals::RandomInt(0, 255), Globals::RandomInt(0, 255)));
@@ -81,11 +82,33 @@ void Agent::Update() {
 		eye->Update(nearbyObjects);
 	mouth->Update(nearbyObjects);
 
+	
+	// Get dir to bit object
+	bitObjDeltaDir = 0;
+	bitObjDir = 0;
+	bitObjDist = 0;
+	bool bitObjIsFood = false;
+	bool bitObjIsWaste = false;
+	shared_ptr<Object> bitObj = bitObjectPtr.lock();
+	if (bitObj) {
+		bitObjDir = pos.GetAngleTo(bitObj->GetPos());
+		bitObjDeltaDir = atan2(sin(bitObjDir - dir), cos(bitObjDir - dir));
+		bitObjDist = pos.GetDistance(bitObj->GetPos());
+		if (bitObj->GetType() == "agent" || bitObj->GetType() == "food")
+			bitObjIsFood = true;
+		if (bitObj->GetType() == "waste")
+			bitObjIsWaste = true;
+
+		if (bitObjDist >= viewDistance)
+			bitObjectPtr.reset();
+	}
+
+
 	// Get output from NN
 	vector<double> inputs = {
 		1.0,								// const
 		sin(stats.age),						// sin
-		double(sin(stats.age) > 0),				// tick
+		double(sin(stats.age) > 0),			// tick
 		stats.GetAgePercent(),				// age
 		stats.GetHealthPercent(),			// health
 		stats.GetEnergyPercent(),			// energy
@@ -95,6 +118,10 @@ void Agent::Update() {
 		nearbyAgents / 10.0,				// nearby objects
 		(double)mouth->CanBite(),			// can bite
 		(double)mouth->ObjectInMouth(),		// object in mouth
+		bitObjDeltaDir,						// dir to bit object
+		1.0 - bitObjDist / viewDistance,	// dist to bit object
+		(double)bitObjIsFood,				// bit object is food
+		(double)bitObjIsWaste,				// bit object is waste
 		eyeSpreadPercent,					// eye spread
 	};
 	for (auto eye : eyes) {
@@ -130,7 +157,7 @@ void Agent::Update() {
 
 	if (mem1Overwrite)
 		memory[0] = mem1;
-	
+
 
 	if (GameRules::IsRuleEnabled("EyeMovement")) {
 		// update eye angles
@@ -150,7 +177,9 @@ void Agent::Update() {
 		Reproduce();
 
 	// healing
+	healing = false;
 	if (wantsToHeal && stats.energy > stats.healAmount) {
+		healing = true;
 		stats.health += stats.healAmount;
 		stats.energy -= stats.healAmount;
 		if (stats.health > stats.maxHealth) {
@@ -188,8 +217,10 @@ void Agent::Update() {
 		wantsToEat = true;
 	
 	mouth->SetWantsToBite(wantsToEat);
-	if (wantsToEat && mouth->CanBite() && mouth->ObjectInMouth())
+	if (wantsToEat && mouth->CanBite() && mouth->ObjectInMouth()) {
 		mouth->Bite();
+		bitObjectPtr = mouth->GetObjectInMouth();
+	}
 
 
 	// digestion
@@ -256,10 +287,16 @@ void Agent::Draw() {
 	al_draw_filled_circle(pos.x, pos.y, radius, color);
 	
 	int lineLen = radius*2 + forwardSpeed;
+
+	if (healing) {
+		al_draw_circle(pos.x, pos.y, radius + 5, al_map_rgba(100, 0, 0, 50), 2);
+	}
 	//al_draw_line(pos.x, pos.y, pos.x + cos(dir) * lineLen, pos.y - sin(dir) * lineLen, al_map_rgb(255, 0, 255), 2);
 
 	//al_draw_line(pos.x, pos.y, pos.x + cos(dirToFood) * 20, pos.y - sin(dirToFood) * 20, al_map_rgb(0, 255, 0), 2);
 	//al_draw_line(pos.x, pos.y, pos.x + cos(dirToAgent) * 20, pos.y - sin(dirToAgent) * 20, al_map_rgb(255, 0, 0), 2);
+	al_draw_line(pos.x, pos.y, pos.x + cos(bitObjDir) * 20, pos.y - sin(bitObjDir) * 20, al_map_rgb(255, 0, 0), 2);
+	al_draw_line(pos.x, pos.y, pos.x + cos(bitObjDeltaDir) * 20, pos.y - sin(bitObjDeltaDir) * 20, al_map_rgb(255, 0, 255), 2);
 
 }
 
@@ -390,6 +427,10 @@ void Agent::SetHealth(double newHealth) {
 
 void Agent::AddWaste(double amount) {
 	stats.waste += amount;
+}
+
+void Agent::HealthToWaste(double amount) {
+	stats.HealthToWaste(amount);
 }
 
 int Agent::GetGeneration() {

@@ -35,5 +35,7 @@ public:
 	void SetWantsToBite(bool val);
 
 	bool ObjectInMouth();
+
+	weak_ptr<Object> GetObjectInMouth();
 };
 

@@ -17,7 +17,8 @@ AgentStats::AgentStats() {
 	maxWaste = 0;
 	maxSpeed = 0;
 	damage = 15;
-	healAmount = 0;
+	healAmount = 0.1;
+	accSpeed = 0;
 
 	age = 0;
 	maxAge = 60.0 * 5;
@@ -43,7 +44,7 @@ void AgentStats::SetGenes(vector<float> newGenes) {
 	maxWaste = 0;
 	maxSpeed = 0;
 	damage = 15;
-	healAmount = 0;
+	healAmount = 0.1;
 
 	age = 0;
 	maxAge = 60.0 * 5;
@@ -90,6 +91,11 @@ double AgentStats::GetWastePercent() {
 void AgentStats::HealthToWaste(double amount) {
 	health -= amount;
 	waste += amount;
+	if (health < 0) {
+		double diff = abs(health);
+		health += diff;
+		waste -= diff;
+	}
 }
 
 void AgentStats::HealthToEnergy(double amount) {

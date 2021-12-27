@@ -76,13 +76,13 @@ void Mouth::Bite() {
 			double eatAmount = Globals::Constrain((double)parent->GetDamage(), 0.0, food->GetEnergy());
 			//double usableEnergy = eatAmount * 0.1;
 			double waste = eatAmount;
-			double healthLoss = waste / 2;
+			double healthLoss = eatAmount / 2;
 
 			//parent->AddEnergy(usableEnergy);
 			parent->AddWaste(waste);
-			parent->SetHealth(parent->GetHealth() - healthLoss);
+			parent->HealthToWaste(healthLoss);
 
-			food->SetEnergy(food->GetEnergy() - waste + healthLoss);
+			food->SetEnergy(food->GetEnergy() - waste);
 		}
 	}
 	else if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(collidingObjectPtr.lock())) {
@@ -100,4 +100,8 @@ void Mouth::SetWantsToBite(bool val) {
 
 bool Mouth::ObjectInMouth() {
 	return !collidingObjectPtr.expired();
+}
+
+weak_ptr<Object> Mouth::GetObjectInMouth() {
+	return collidingObjectPtr;
 }

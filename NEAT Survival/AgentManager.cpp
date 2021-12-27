@@ -30,6 +30,10 @@ shared_ptr<Agent> GameManager::SpawnAgent(float x, float y) {
 		"# nearby agents",
 		"can bite",
 		"object in mouth",
+		"dir to bit obj",
+		"dist to bit obj",
+		"bit obj is food",
+		"bit obj is waste",
 		"eye spread",
 	};
 	for (int i = 1; i <= 3; i++) {

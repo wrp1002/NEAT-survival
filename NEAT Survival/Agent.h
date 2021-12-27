@@ -24,6 +24,7 @@ private:
 	const float maxRotationSpeed = 0.1;
 	bool userControlled = false;
 	bool shouldReproduce;
+	bool healing;
 
 	int digestTime, digestTimeStart;
 
@@ -39,6 +40,9 @@ private:
 	float dirToFood, dirToAgent;
 	float forwardSpeed, rotationSpeed;
 	int generation;
+
+	weak_ptr<Object> bitObjectPtr;
+	float bitObjDir, bitObjDeltaDir, bitObjDist;
 
 	vector<shared_ptr<Object>> GetNearbyObjects();
 	shared_ptr<Object> GetClosestObjectOfType(vector<shared_ptr<Object>> nearbyObjects, string type);
@@ -71,6 +75,7 @@ public:
 	void AddEnergy(double amount);
 	void SetHealth(double newHealth);
 	void AddWaste(double amount);
+	void HealthToWaste(double amount);
 
 	float GetX();
 	float GetY();
