@@ -72,6 +72,14 @@ void InfoDisplay::Draw() {
 				DrawNN(selectedAgent->GetNN()),
 			});
 		}
+
+		if (shared_ptr<Egg> selectedEgg = dynamic_pointer_cast<Egg>(object)) {
+			infoText.insert(infoText.end(), {
+				format("Generation: {}", selectedEgg->GetGeneration()),
+				format("Hatch Timer: {}", selectedEgg->GetHatchTimer()),
+				format("Health: {:.2f}", selectedEgg->GetHealth())
+			});
+		}
 	}
 
 	for (unsigned i = 0; i < infoText.size(); i++) {

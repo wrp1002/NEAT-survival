@@ -145,7 +145,6 @@ void Agent::Update() {
 	bool wantsToBoost = outputs[8] > 0.5;
 	eyeSpreadPercent = (outputs[9] + 1.0) / 2;
 
-	bool shouldReproduce = wantToReproduce && stats.energy > stats.maxEnergy * 0.5;
 
 	// handle user input
 	if (userControlled) {
@@ -153,7 +152,13 @@ void Agent::Update() {
 		rotationSpeed = maxRotationSpeed * UserInput::IsPressed(ALLEGRO_KEY_LEFT) - maxRotationSpeed * UserInput::IsPressed(ALLEGRO_KEY_RIGHT);
 		wantsToEat = UserInput::IsPressed(ALLEGRO_KEY_E);
 		wantsToBoost = UserInput::IsPressed(ALLEGRO_KEY_B);
+		wantToReproduce = UserInput::IsPressed(ALLEGRO_KEY_R);
+		wantsToHeal = UserInput::IsPressed(ALLEGRO_KEY_H);
 	}
+
+
+	shouldReproduce = wantToReproduce && stats.energy > stats.maxEnergy * 0.5;
+
 
 	if (mem1Overwrite)
 		memory[0] = mem1;
@@ -173,8 +178,8 @@ void Agent::Update() {
 
 	double energyUsage = 0.005;
 	
-	if (shouldReproduce)
-		Reproduce();
+	//if (shouldReproduce)
+		//Reproduce();
 
 	// healing
 	healing = false;
@@ -187,6 +192,12 @@ void Agent::Update() {
 			stats.health -= diff;
 			stats.waste += diff;
 		}
+
+		forwardSpeed = 0;
+		rotationSpeed = 0;
+		wantsToBoost = false;
+		wantsToEat = false;
+		wantToReproduce = false;
 	}
 
 	energyUsage += abs(outputs[0]) * 0.005 * stats.sizeGene * (1.0 + wantsToBoost * 5.0);
@@ -459,6 +470,18 @@ float Agent::GetAge() {
 
 float Agent::GetDamage() {
 	return stats.damage;
+}
+
+bool Agent::ShouldReproduce() {
+	return shouldReproduce;
+}
+
+AgentStats Agent::GetAgentStats() {
+	return stats;
+}
+
+shared_ptr<NEAT> Agent::CopyNN() {
+	return nn->Copy();
 }
 
 float Agent::GetHealthPercent() {

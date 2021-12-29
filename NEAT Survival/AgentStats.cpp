@@ -19,6 +19,7 @@ AgentStats::AgentStats() {
 	damage = 15;
 	healAmount = 0.1;
 	accSpeed = 0;
+	size = 0;
 
 	age = 0;
 	maxAge = 60.0 * 5;
@@ -69,6 +70,14 @@ void AgentStats::SetGenes(vector<float> newGenes) {
 	// Speed gene: 4
 	speedGene = genes[4];
 	accSpeed = speedGene + 0.5;
+}
+
+void AgentStats::Mutate() {
+	for (unsigned i = 0; i < genes.size(); i++) {
+		genes[i] += Globals::RandomSign() * Globals::Random() * 0.1;
+		genes[i] = Globals::Constrain(genes[i], 0.0, 1.0);
+	}
+	SetGenes(genes);
 }
 
 

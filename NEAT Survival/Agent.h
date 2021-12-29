@@ -44,6 +44,9 @@ private:
 	weak_ptr<Object> bitObjectPtr;
 	float bitObjDir, bitObjDeltaDir, bitObjDist;
 
+	weak_ptr<Object> damageObjectPtr;
+	float damageObjDir, damageObjDeltaDir, damageObjDist;
+
 	vector<shared_ptr<Object>> GetNearbyObjects();
 	shared_ptr<Object> GetClosestObjectOfType(vector<shared_ptr<Object>> nearbyObjects, string type);
 
@@ -89,6 +92,9 @@ public:
 	float GetHealthPercent();
 	float GetAge();
 	float GetDamage();
-	
+	bool ShouldReproduce();
+	AgentStats GetAgentStats();
+	shared_ptr<NEAT> CopyNN();
+
 };
 

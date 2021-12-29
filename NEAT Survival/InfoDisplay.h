@@ -15,6 +15,7 @@
 #include "Vector2f.h"
 #include "Agent.h"
 #include "NEAT.h"
+#include "Egg.h"
 
 using namespace std;
 

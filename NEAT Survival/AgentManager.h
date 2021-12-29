@@ -10,6 +10,7 @@
 #include "Object.h"
 #include "CollisionGrid.h"
 #include "Food.h"
+#include "Egg.h"
 #include "ThreadPool.h"
 
 class Agent;
@@ -21,6 +22,7 @@ namespace GameManager {
     extern vector<shared_ptr<Object>> allObjects;
     extern vector<shared_ptr<Agent>> agents;
     extern vector<shared_ptr<Food>> allFood;
+    extern vector<shared_ptr<Egg>> eggs;
     extern weak_ptr<Agent> player;
     extern CollisionGrid collisionGrid;
     extern ThreadPool threadPool;
@@ -51,6 +53,8 @@ namespace GameManager {
     string GetSimTimeStr();
     string GetSimTicksStr();
     shared_ptr<Agent> GetRandomAgent();
+    shared_ptr<Egg> GetEggFromAgent(shared_ptr<Agent> agent);
+    shared_ptr<Agent> GetAgentFromEgg(shared_ptr<Egg> egg);
 
     void ResetSpeed();
     void IncreaseSpeed();

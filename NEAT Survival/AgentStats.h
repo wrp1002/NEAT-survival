@@ -37,6 +37,7 @@ public:
 
 	AgentStats();
 	void SetGenes(vector<float> newGenes);
+	void Mutate();
 
 	double GetAgePercent();
 	double GetHealthPercent();

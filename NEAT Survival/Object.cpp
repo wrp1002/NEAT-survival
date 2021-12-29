@@ -21,7 +21,7 @@ Object::~Object()
 }
 
 void Object::Draw() {
-	al_draw_filled_circle(pos.x, pos.y, radius, al_map_rgb(255, 0, 255));
+	al_draw_filled_circle(pos.x, pos.y, radius, color);
 }
 
 void Object::Update() {

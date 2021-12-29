@@ -5,6 +5,7 @@
 vector<shared_ptr<Object>> GameManager::allObjects;
 vector<shared_ptr<Agent>> GameManager::agents;
 vector<shared_ptr<Food>> GameManager::allFood;
+vector<shared_ptr<Egg>> GameManager::eggs;
 weak_ptr<Agent> GameManager::player;
 CollisionGrid GameManager::collisionGrid;
 ThreadPool GameManager::threadPool;
@@ -82,6 +83,44 @@ shared_ptr<Agent> GameManager::SpawnRandomAgent() {
 }
 
 
+shared_ptr<Egg> GameManager::GetEggFromAgent(shared_ptr<Agent> agent) {
+	shared_ptr<NEAT> newNN = agent->CopyNN();
+	newNN->Mutate();
+
+	AgentStats stats = AgentStats(agent->GetAgentStats());
+	stats.Mutate();
+
+	vector<float> genes = stats.genes;
+	double eggEnergy = agent->GetEnergy() / 2.0;
+	int generation = agent->GetGeneration() + 1;
+	float radius = agent->GetRadius() / 2;
+
+	shared_ptr<Egg> newEgg = make_shared<Egg>(Egg(genes, newNN, eggEnergy / 2, eggEnergy / 2, generation, agent->GetPos(), radius));
+	agent->SetEnergy(eggEnergy);
+
+	return newEgg;
+}
+
+
+shared_ptr<Agent> GameManager::GetAgentFromEgg(shared_ptr<Egg> egg) {
+	Vector2f pos = egg->GetPos();
+	vector<float> genes = egg->GetGenes();
+	shared_ptr<NEAT> nn = egg->GetNN();
+	int generation = egg->GetGeneration();
+	double health = egg->GetHealth();
+	double energy = egg->GetEnergy();
+
+	shared_ptr<Agent> newAgent = make_shared<Agent>(Agent(pos.x, pos.y, 10, nn));
+	newAgent->Init();
+	newAgent->SetGenes(genes);
+	newAgent->SetGeneration(generation);
+	newAgent->SetEnergy(energy);
+	newAgent->SetHealth(health);
+
+	return newAgent;
+}
+
+
 void GameManager::SpawnFood(Vector2f pos, double energy, int type) {
 	shared_ptr<Food> newFood = make_shared<Food>(Food(pos, energy, type));
 	allFood.push_back(newFood);
@@ -126,8 +165,11 @@ void GameManager::Update() {
 			cout << "Clearing collision grid took " << duration.count() << " microseconds" << endl;
 
 		start = high_resolution_clock::now();
+		
+		// add objects to collision grid
 		for (auto object : allObjects)
 			collisionGrid.AddObject(object);
+
 		stop = high_resolution_clock::now();
 		duration = duration_cast<microseconds>(stop - start);
 		if (timeOutput)
@@ -135,6 +177,7 @@ void GameManager::Update() {
 
 		start = high_resolution_clock::now();
 
+		vector<shared_ptr<Object>> newObjects;
 
 		if (useThreads) {
 			// using threads
@@ -147,7 +190,7 @@ void GameManager::Update() {
 				updateThreads.push_back(thread(UpdateObject, allObjects[i]));
 			for (unsigned i = 0; i < size; i++)
 				updateThreads[i].join();
-				*/
+			*/
 			
 			vector <function<void()>> jobs;
 
@@ -164,9 +207,36 @@ void GameManager::Update() {
 			// not using threads
 			unsigned size = allObjects.size();
 			for (unsigned i = 0; i < size; i++) {
-				if (allObjects[i])
+				if (allObjects[i]) {
 					allObjects[i]->Update();
+
+					if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(allObjects[i])) {
+						if (agent->ShouldReproduce()) {
+							newObjects.push_back(GetEggFromAgent(agent));
+						}
+					}
+
+					if (shared_ptr<Egg> egg = dynamic_pointer_cast<Egg>(allObjects[i])) {
+						if (egg->ReadyToHatch()) {
+							newObjects.push_back(GetAgentFromEgg(egg));
+							egg->SetAlive(false);
+						}
+					}
+
+				}
 			}
+		}
+
+		// add new objects
+		for (unsigned i = 0; i < newObjects.size(); i++) {
+			allObjects.push_back(newObjects[i]);
+
+			if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(newObjects[i]))
+				agents.push_back(agent);
+			if (shared_ptr<Food> food = dynamic_pointer_cast<Food>(newObjects[i]))
+				allFood.push_back(food);
+			if (shared_ptr<Egg> egg = dynamic_pointer_cast<Egg>(newObjects[i]))
+				eggs.push_back(egg);
 		}
 
 
@@ -249,9 +319,14 @@ double GameManager::GetTotalEnergy() {
 	double total = 0;
 	for (auto object : allObjects) {
 		total += object->GetEnergy();
+
 		if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(object)) {
 			total += agent->GetWaste();
 			total += agent->GetHealth();
+		}
+
+		if (shared_ptr<Egg> egg= dynamic_pointer_cast<Egg>(object)) {
+			total += egg->GetHealth();
 		}
 	}
 	return total;

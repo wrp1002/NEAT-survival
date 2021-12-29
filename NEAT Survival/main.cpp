@@ -78,8 +78,8 @@ int main() {
 					break;
 
 				case ALLEGRO_KEY_R:
-					if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(InfoDisplay::selectedObject.lock()))
-						agent->Reproduce();
+					//if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(InfoDisplay::selectedObject.lock()))
+						//agent->Reproduce();
 					//GameManager::Reset();
 					break;
 
