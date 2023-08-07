@@ -12,8 +12,8 @@
 #include "Food.h"
 #include "Egg.h"
 #include "ThreadPool.h"
-
-class Agent;
+#include "ObjectSpawnQueue.h"
+#include "Agent.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -53,7 +53,6 @@ namespace GameManager {
     string GetSimTimeStr();
     string GetSimTicksStr();
     shared_ptr<Agent> GetRandomAgent();
-    shared_ptr<Egg> GetEggFromAgent(shared_ptr<Agent> agent);
     shared_ptr<Agent> GetAgentFromEgg(shared_ptr<Egg> egg);
 
     void ResetSpeed();
@@ -66,6 +65,7 @@ namespace GameManager {
 
     void Update();
     void UpdateObject(shared_ptr<Object> obj);
+    void AddNewObjectsFromQueue();
     void HandleCollision(int x, int y);
     void Draw();
     void CleanupObjects();

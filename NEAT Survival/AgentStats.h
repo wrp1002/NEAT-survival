@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <iostream>
+#include <format>
 
 #include "Globals.h"
 
@@ -21,6 +22,8 @@ public:
 	float gGene;
 	float bGene;
 	float sizeGene;
+	float dietMeatCoef;
+	float dietPlantCoef;
 
 	double health, maxHealth;
 	double energy, maxEnergy;
@@ -33,11 +36,16 @@ public:
 	float accSpeed;
 	float age, maxAge;
 
+	int hurtTimer;
+	int hurtTimerStart;
+
 	ALLEGRO_COLOR color;
+
 
 	AgentStats();
 	void SetGenes(vector<float> newGenes);
 	void Mutate();
+	void Print();
 
 	double GetAgePercent();
 	double GetHealthPercent();

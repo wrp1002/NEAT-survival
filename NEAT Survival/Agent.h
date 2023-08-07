@@ -6,13 +6,14 @@
 #include "Object.h"
 #include "NEAT.h"
 #include "UserInput.h"
-#include "AgentManager.h"
 #include "Food.h"
 #include "Eye.h"
 #include "Mouth.h"
 #include "AgentStats.h"
 #include "GameRules.h"
 #include "TriangleEye.h"
+#include "ObjectSpawnQueue.h"
+#include "Egg.h"
 
 #include <iostream>
 #include <memory>
@@ -47,8 +48,12 @@ private:
 	weak_ptr<Object> damageObjectPtr;
 	float damageObjDir, damageObjDeltaDir, damageObjDist;
 
-	vector<shared_ptr<Object>> GetNearbyObjects();
-	shared_ptr<Object> GetClosestObjectOfType(vector<shared_ptr<Object>> nearbyObjects, string type);
+	weak_ptr<Object> closestAgentPtr;
+	float closestAgentDir, closestAgentDeltaDir, closestAgentDist;
+
+	vector<weak_ptr<Object>> nearbyObjects;
+
+	shared_ptr<Object> GetClosestObjectOfType(vector<weak_ptr<Object>> nearbyObjects, string type);
 
 public:
 	Agent(float x, float y, float radius, vector<string> inputLabels, vector<string> outputLabels);
@@ -60,7 +65,10 @@ public:
 	void Update();
 	void Draw();
 	void CollisionEvent(shared_ptr<Object> other);
+	void SetNearbyObjects(vector<weak_ptr<Object>> nearbyObjects);
 	void Reproduce();
+	void EatPlant(double amount);
+	void EatMeat(double amount);
 
 	void SetGenes(vector<float> newGenes);
 	void MutateGenes();
@@ -79,20 +87,23 @@ public:
 	void SetHealth(double newHealth);
 	void AddWaste(double amount);
 	void HealthToWaste(double amount);
+	void TakeDamage(double amount);
+	void SetWaste(double amount);
 
+	bool ShouldReproduce();
+	bool IsHurt();
+	bool IsDead();
+	int GetGeneration();
 	float GetX();
 	float GetY();
-	shared_ptr<NEAT> GetNN();
-	int GetGeneration();
-
-	double GetEnergy();
-	double GetWaste();
-	double GetHealth();
 	float GetEnergyPercent();
 	float GetHealthPercent();
 	float GetAge();
 	float GetDamage();
-	bool ShouldReproduce();
+	double GetEnergy();
+	double GetWaste();
+	double GetHealth();
+	shared_ptr<NEAT> GetNN();
 	AgentStats GetAgentStats();
 	shared_ptr<NEAT> CopyNN();
 

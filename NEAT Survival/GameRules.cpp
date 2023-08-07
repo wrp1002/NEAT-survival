@@ -6,7 +6,8 @@ unordered_map<string, bool> GameRules::rules(
         { "EyeMovement", false },
         { "MouthControl", false },
         { "FollowRandomAgent", false },
-        { "ForceMinPopulation", false }
+        { "ForceMinPopulation", false },
+        { "EnforceDiet", false },
     }
 );
 

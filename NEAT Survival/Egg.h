@@ -5,6 +5,8 @@
 #include "AgentStats.h"
 #include "Object.h"
 #include "NEAT.h"
+#include "Food.h"
+#include "ObjectSpawnQueue.h"
 
 using std::cout, std::endl;
 
@@ -24,6 +26,9 @@ public:
 	void Update();
 	void Draw();
 	void Print();
+	void ReleaseEnergy();
+
+	void SetHealth(double newHealth);
 
 	shared_ptr<NEAT> GetNN();
 	vector<float> GetGenes();

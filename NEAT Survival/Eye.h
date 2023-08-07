@@ -33,7 +33,7 @@ public:
 
 	void UpdatePosition();
 	void UpdateAngle(float movementPercent);
-	void Update(vector<shared_ptr<Object>> nearbyObjects);
+	void Update(vector<weak_ptr<Object>> nearbyObjects);
 	void Draw();
 
 	float GetDistanceScaled();

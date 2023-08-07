@@ -18,14 +18,19 @@ void Mouth::UpdatePosition() {
 	this->pos = parent->GetPos() + Vector2f::FromDir(dir, parent->GetRadius());
 }
 
-void Mouth::Update(vector<shared_ptr<Object>> nearbyObjects) {
+void Mouth::Update(vector<weak_ptr<Object>> nearbyObjects) {
 	if (parentPtr.expired()) {
 		cout << "mouth tried to update with null parent" << endl;
 		return;
 	}
 	
 	collidingObjectPtr.reset();
-	for (auto obj : nearbyObjects) {
+	for (auto objPtr : nearbyObjects) {
+		if (objPtr.expired())
+			continue;
+
+		shared_ptr<Object> obj = objPtr.lock();
+
 		if (CollidesWith(obj) && obj != parentPtr.lock()) {
 			collidingObjectPtr = obj;
 			break;
@@ -63,11 +68,29 @@ void Mouth::Bite() {
 
 	shared_ptr<Agent> parent = parentPtr.lock();
 
+
 	if (shared_ptr<Food> food = dynamic_pointer_cast<Food>(collidingObjectPtr.lock())) {
 		if (food->IsFood()) {
+			// Biting plant
 			double eatAmount = Globals::Constrain((double)parent->GetDamage(), 0.0, food->GetEnergy());
-			parent->AddEnergy(eatAmount);
 			food->SetEnergy(food->GetEnergy() - eatAmount);
+
+			if (GameRules::IsRuleEnabled("EnforceDiet"))
+				parent->EatPlant(eatAmount);
+			else
+				parent->AddEnergy(eatAmount);
+
+
+		}
+		else if (food->IsMeat()) {
+			// Biting meat
+			double eatAmount = Globals::Constrain((double)parent->GetDamage(), 0.0, food->GetEnergy());
+			food->SetEnergy(food->GetEnergy() - eatAmount);
+
+			if (GameRules::IsRuleEnabled("EnforceDiet"))
+				parent->EatMeat(eatAmount);
+			else
+				parent->AddEnergy(eatAmount);
 		}
 		else if (food->IsWaste()) {
 			if (!GameRules::IsRuleEnabled("WasteDamage"))
@@ -86,9 +109,33 @@ void Mouth::Bite() {
 		}
 	}
 	else if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(collidingObjectPtr.lock())) {
+		// Biting other agent
 		double eatAmount = Globals::Constrain((double)parent->GetDamage(), 0.0, agent->GetHealth());
-		agent->SetHealth(agent->GetHealth() - eatAmount);
-		parent->AddEnergy(eatAmount);
+		agent->TakeDamage(eatAmount);
+
+		if (agent->IsDead()) {
+			double remainingEnergy = agent->GetEnergy();
+			double remainingWaste = agent->GetWaste();
+			agent->SetEnergy(0.0);
+			agent->SetWaste(0.0);
+			eatAmount += remainingEnergy;
+			eatAmount += remainingWaste;
+		}
+
+		if (GameRules::IsRuleEnabled("EnforceDiet"))
+			parent->EatMeat(eatAmount);
+		else
+			parent->AddEnergy(eatAmount);
+	}
+	else if (shared_ptr<Egg> egg = dynamic_pointer_cast<Egg>(collidingObjectPtr.lock())) {
+		// Biting egg
+		double eatAmount = Globals::Constrain((double)parent->GetDamage(), 0.0, egg->GetHealth());
+		egg->SetHealth(egg->GetHealth() - eatAmount);
+
+		if (GameRules::IsRuleEnabled("EnforceDiet"))
+			parent->EatMeat(eatAmount);
+		else
+			parent->AddEnergy(eatAmount);
 	}
 
 	cooldownTimer = cooldownTimerStart;

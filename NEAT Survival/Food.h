@@ -32,5 +32,6 @@ public:
 	bool IsFood();
 	bool IsWaste();
 	bool IsMeat();
+	int GetLife();
 };
 

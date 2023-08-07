@@ -1,6 +1,4 @@
 #include "AgentManager.h"
-#include "Agent.h"
-#include "Food.h"
 
 vector<shared_ptr<Object>> GameManager::allObjects;
 vector<shared_ptr<Agent>> GameManager::agents;
@@ -35,6 +33,8 @@ shared_ptr<Agent> GameManager::SpawnAgent(float x, float y) {
 		"dist to bit obj",
 		"bit obj is food",
 		"bit obj is waste",
+		"closest agent dir",
+		"closest agent dist",
 		"eye spread",
 	};
 	for (int i = 1; i <= 3; i++) {
@@ -47,8 +47,8 @@ shared_ptr<Agent> GameManager::SpawnAgent(float x, float y) {
 
 	vector<string> outputLabels = {
 		"forward speed",
-		"turn left",
-		"turn right",
+		"turn",
+		"unused",
 		"want to reproduce",
 		"wants to heal",
 		"mem1",
@@ -80,25 +80,6 @@ shared_ptr<Agent> GameManager::SpawnRandomAgent() {
 		agent->MutateAddConnection();
 
 	return agent;
-}
-
-
-shared_ptr<Egg> GameManager::GetEggFromAgent(shared_ptr<Agent> agent) {
-	shared_ptr<NEAT> newNN = agent->CopyNN();
-	newNN->Mutate();
-
-	AgentStats stats = AgentStats(agent->GetAgentStats());
-	stats.Mutate();
-
-	vector<float> genes = stats.genes;
-	double eggEnergy = agent->GetEnergy() / 2.0;
-	int generation = agent->GetGeneration() + 1;
-	float radius = agent->GetRadius() / 2;
-
-	shared_ptr<Egg> newEgg = make_shared<Egg>(Egg(genes, newNN, eggEnergy / 2, eggEnergy / 2, generation, agent->GetPos(), radius));
-	agent->SetEnergy(eggEnergy);
-
-	return newEgg;
 }
 
 
@@ -165,7 +146,7 @@ void GameManager::Update() {
 			cout << "Clearing collision grid took " << duration.count() << " microseconds" << endl;
 
 		start = high_resolution_clock::now();
-		
+
 		// add objects to collision grid
 		for (auto object : allObjects)
 			collisionGrid.AddObject(object);
@@ -177,66 +158,39 @@ void GameManager::Update() {
 
 		start = high_resolution_clock::now();
 
-		vector<shared_ptr<Object>> newObjects;
-
 		if (useThreads) {
 			// using threads
-			/*
-			vector<thread> updateThreads;
-
-
-			unsigned size = allObjects.size();
-			for (unsigned i = 0; i < size; i++)
-				updateThreads.push_back(thread(UpdateObject, allObjects[i]));
-			for (unsigned i = 0; i < size; i++)
-				updateThreads[i].join();
-			*/
-			
 			vector <function<void()>> jobs;
 
 			for (unsigned i = 0; i < allObjects.size(); i++)
 				jobs.push_back(bind(&GameManager::UpdateObject, allObjects[i]));
 
-			//cout << jobs.size() << " update jobs" << endl;
-
 			threadPool.AddJobs(jobs);
-
-			//while (threadPool.HasJobs()) {}
 		}
 		else {
 			// not using threads
 			unsigned size = allObjects.size();
-			for (unsigned i = 0; i < size; i++) {
-				if (allObjects[i]) {
-					allObjects[i]->Update();
 
-					if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(allObjects[i])) {
-						if (agent->ShouldReproduce()) {
-							newObjects.push_back(GetEggFromAgent(agent));
-						}
-					}
-
-					if (shared_ptr<Egg> egg = dynamic_pointer_cast<Egg>(allObjects[i])) {
-						if (egg->ReadyToHatch()) {
-							newObjects.push_back(GetAgentFromEgg(egg));
-							egg->SetAlive(false);
-						}
-					}
-
+#pragma omp parallel for
+			for (int i = 0; i < size; i++) {
+				if (!allObjects[i]->IsAlive()) {
+					continue;
 				}
+
+				if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(allObjects[i])) {
+					vector<weak_ptr<Object>> nearbyObjects = collisionGrid.GetObjectsWeak(agent->GetPos(), 1);
+					agent->SetNearbyObjects(nearbyObjects);
+				}
+
+				if (shared_ptr<Egg> egg = dynamic_pointer_cast<Egg>(allObjects[i])) {
+					if (egg->ReadyToHatch()) {
+						ObjectSpawnQueue::AddObject(GetAgentFromEgg(egg));
+						egg->SetAlive(false);
+					}
+				}
+
+				allObjects[i]->Update();
 			}
-		}
-
-		// add new objects
-		for (unsigned i = 0; i < newObjects.size(); i++) {
-			allObjects.push_back(newObjects[i]);
-
-			if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(newObjects[i]))
-				agents.push_back(agent);
-			if (shared_ptr<Food> food = dynamic_pointer_cast<Food>(newObjects[i]))
-				allFood.push_back(food);
-			if (shared_ptr<Egg> egg = dynamic_pointer_cast<Egg>(newObjects[i]))
-				eggs.push_back(egg);
 		}
 
 
@@ -282,12 +236,31 @@ void GameManager::Update() {
 		if (timeOutput)
 			cout << "cleanup took " << duration.count() << " microseconds" << endl << endl;
 
+
+		// add new objects
+		AddNewObjectsFromQueue();
+
+
 		simTicks++;
 	}
 }
 
 void GameManager::UpdateObject(shared_ptr<Object> obj) {
 	obj->Update();
+}
+
+void GameManager::AddNewObjectsFromQueue() {
+	while (!ObjectSpawnQueue::IsEmpty()) {
+		shared_ptr<Object> newObject = ObjectSpawnQueue::Pop();
+		allObjects.push_back(newObject);
+
+		if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(newObject))
+			agents.push_back(agent);
+		if (shared_ptr<Food> food = dynamic_pointer_cast<Food>(newObject))
+			allFood.push_back(food);
+		if (shared_ptr<Egg> egg = dynamic_pointer_cast<Egg>(newObject))
+			eggs.push_back(egg);
+	}
 }
 
 void GameManager::HandleCollision(int x, int y) {
@@ -369,6 +342,8 @@ string GameManager::GetSimTicksStr() {
 }
 
 shared_ptr<Agent> GameManager::GetRandomAgent() {
+	if (agents.size() == 0)
+		return nullptr;
 	return agents[rand() % agents.size()];
 }
 

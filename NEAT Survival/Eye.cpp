@@ -46,7 +46,7 @@ void Eye::UpdateAngle(float movementPercent) {
 	dir = parent->GetDir() + deltaDir * movementPercent;
 }
 
-void Eye::Update(vector<shared_ptr<Object>> nearbyObjects) {
+void Eye::Update(vector<weak_ptr<Object>> nearbyObjects) {
 	//movementPercent = newMovementPercent;
 	float minDistance = viewDistance;
 	Vector2f endPos = pos + Vector2f::FromDir(dir, viewDistance);
@@ -58,7 +58,12 @@ void Eye::Update(vector<shared_ptr<Object>> nearbyObjects) {
 	viewedG = 0;
 	viewedB = 0;
 
-	for (auto object : nearbyObjects) {
+	for (auto objectPtr : nearbyObjects) {
+		if (objectPtr.expired())
+			continue;
+
+		shared_ptr<Object> object = objectPtr.lock();
+
 		if (object == parentPtr.lock())
 			continue;
 

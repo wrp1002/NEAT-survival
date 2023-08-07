@@ -26,7 +26,7 @@ public:
 	Mouth(shared_ptr<Agent> parent, float radius);
 
 	void UpdatePosition();
-	void Update(vector<shared_ptr<Object>> nearbyObjects);
+	void Update(vector<weak_ptr<Object>> nearbyObjects);
 	void Draw();
 
 	bool CanBite();

@@ -83,7 +83,7 @@ void TriangleEye::UpdatePos() {
 	posR = pos + Vector2f::FromDir(dir2, viewDistance);
 }
 
-void TriangleEye::Update(vector<shared_ptr<Object>> nearbyObjects) {
+void TriangleEye::Update(vector<weak_ptr<Object>> nearbyObjects) {
 	seenObjects.clear();
 	avgR = avgG = avgB = 0;
 	minDist = viewDistance;
@@ -94,7 +94,12 @@ void TriangleEye::Update(vector<shared_ptr<Object>> nearbyObjects) {
 		return;
 	}
 
-	for (shared_ptr<Object> object : nearbyObjects) {
+	for (auto objectPtr : nearbyObjects) {
+		if (objectPtr.expired())
+			continue;
+
+		shared_ptr<Object> object = objectPtr.lock();
+
 		if (object == parent)
 			continue;
 

@@ -38,8 +38,9 @@ void CollisionGrid::Draw() {
 }
 
 void CollisionGrid::HandleCollisions() {
-	for (unsigned x = 0; x < width; x++) {
-		for (unsigned y = 0; y < height; y++) {
+#pragma omp parallel for collapse(2)
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
 			HandleCollisionAt(x, y);
 		}
 	}
@@ -51,8 +52,9 @@ void CollisionGrid::HandleCollisionAt(int x, int y) {
 	if (cellObjects.size() < 2)
 		return;
 
-	for (unsigned i = 0; i < cellObjects.size() - 1; i++) {
-		for (unsigned j = i + 1; j < cellObjects.size(); j++) {
+
+	for (int i = 0; i < cellObjects.size() - 1; i++) {
+		for (int j = i + 1; j < cellObjects.size(); j++) {
 			if (cellObjects[i]->CollidesWith(cellObjects[j])) {
 				cellObjects[i]->HandleCollision(cellObjects[j]);
 				cellObjects[i]->CollisionEvent(cellObjects[j]);
@@ -122,6 +124,24 @@ vector<shared_ptr<Object>> CollisionGrid::GetObjects(Vector2f pos, int r) {
 	int x = pos.x / cellSize;
 	int y = pos.y / cellSize;
 	return GetObjects(x, y, r);
+}
+
+
+vector<weak_ptr<Object>> CollisionGrid::GetObjectsWeak(int xPos, int yPos, int r) {
+	vector<weak_ptr<Object>> foundObjects;
+	for (int x = xPos - r; x <= xPos + r; x++) {
+		for (int y = yPos - r; y <= yPos + r; y++) {
+			if (InBounds(x, y))
+				foundObjects.insert(foundObjects.end(), objects[x][y].begin(), objects[x][y].end());
+		}
+	}
+	return foundObjects;
+}
+
+vector<weak_ptr<Object>> CollisionGrid::GetObjectsWeak(Vector2f pos, int r) {
+	int x = pos.x / cellSize;
+	int y = pos.y / cellSize;
+	return GetObjectsWeak(x, y, r);
 }
 
 int CollisionGrid::GetWidth() {

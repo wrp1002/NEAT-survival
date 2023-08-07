@@ -14,8 +14,17 @@ Egg::Egg(vector<float> genes, shared_ptr<NEAT> nn, double health, double energy,
 }
 
 void Egg::Update() {
+	if (!alive)
+		return;
+
 	if (hatchTimer > 0)
 		hatchTimer--;
+
+	// release energy if dead
+	if (this->health <= 0) {
+		alive = false;
+		ReleaseEnergy();
+	}
 }
 
 void Egg::Draw() {
@@ -24,6 +33,23 @@ void Egg::Draw() {
 
 void Egg::Print() {
 	cout << "Egg X:" << pos.x << " Y:" << pos.y << endl;
+}
+
+void Egg::ReleaseEnergy() {
+	double total = energy + health;
+	cout << "Egg died releaseing: " << total << endl;
+
+	while (total >= Food::MAX_ENERGY) {
+		double size = Globals::RandomInt(Food::MAX_ENERGY / 2, Food::MAX_ENERGY);
+		ObjectSpawnQueue::SpawnFood(pos, size, Food::MEAT);
+		total -= size;
+	}
+	if (total > 0)
+		ObjectSpawnQueue::SpawnFood(pos, total, Food::MEAT);
+}
+
+void Egg::SetHealth(double newHealth) {
+	this->health = newHealth;
 }
 
 shared_ptr<NEAT> Egg::GetNN() {

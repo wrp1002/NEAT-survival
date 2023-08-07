@@ -20,6 +20,11 @@ AgentStats::AgentStats() {
 	healAmount = 0.1;
 	accSpeed = 0;
 	size = 0;
+	dietMeatCoef = 0;
+	dietPlantCoef = 0;
+
+	hurtTimer = 0;
+	hurtTimerStart = 250;
 
 	age = 0;
 	maxAge = 60.0 * 5;
@@ -70,6 +75,13 @@ void AgentStats::SetGenes(vector<float> newGenes) {
 	// Speed gene: 4
 	speedGene = genes[4];
 	accSpeed = speedGene + 0.5;
+
+	// Diet gene: 5
+	// 0 - full herb
+	// 1 - full carn
+	dietGene = genes[5];
+	dietPlantCoef = 1.0 - dietGene;
+	dietMeatCoef = dietGene;
 }
 
 void AgentStats::Mutate() {
@@ -78,6 +90,17 @@ void AgentStats::Mutate() {
 		genes[i] = Globals::Constrain(genes[i], 0.0, 1.0);
 	}
 	SetGenes(genes);
+}
+
+void AgentStats::Print() {
+	cout << endl;
+	cout << format("Health: {:.2f}/{:.2f}", health, maxHealth) << endl;
+	cout << format("Energy: {:.2f}/{:.2f}", energy, maxEnergy) << endl;
+	cout << format("Waste: {:.2f}/{:.2f}", waste, maxWaste) << endl;
+	cout << format("Size gene: {:.2f}  damage: {:.2f}", sizeGene, damage) << endl;
+	cout << format("Speed gene: {:.2f}  accSpeed: {:.2f}", speedGene, accSpeed) << endl;
+	cout << format("Diet gene: {:.2f}  dietPlantCoef: {:.2f}  dietMeatCoef: {:.2f}", dietGene, dietPlantCoef, dietMeatCoef) << endl;
+	cout << endl;
 }
 
 
@@ -125,6 +148,11 @@ void AgentStats::WasteToEnergy(double amount) {
 void AgentStats::EnergyToWaste(double amount) {
 	energy -= amount;
 	waste += amount;
+	if (energy < 0) {
+		double diff = abs(energy);
+		energy += diff;
+		waste -= diff;
+	}
 }
 
 void AgentStats::EnergyToHealth(double amount) {

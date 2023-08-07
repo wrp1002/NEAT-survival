@@ -2,6 +2,7 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_native_dialog.h>
 
 #include <iostream>
 
@@ -57,9 +58,19 @@ int main() {
 		}
 		else if (ev.type == ALLEGRO_EVENT_KEY_DOWN) {
 			switch (ev.keyboard.keycode) {
-				case ALLEGRO_KEY_ESCAPE:
-					done = true;
+				case ALLEGRO_KEY_ESCAPE: {
+					int button = al_show_native_message_box(
+						display,
+						"Warning",
+						"Are you sure you want to exit?",
+						NULL,
+						NULL,
+						ALLEGRO_MESSAGEBOX_OK_CANCEL
+					);
+					if (button == 1)
+						done = true;
 					break;
+				}
 
 				case ALLEGRO_KEY_P:
 					GameManager::TogglePlayer();

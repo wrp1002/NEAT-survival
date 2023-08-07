@@ -36,6 +36,8 @@ public:
 	shared_ptr<Object> GetCollidingObject(Vector2f pos);
 	vector<shared_ptr<Object>> GetObjects(int xPos, int yPos, int r);
 	vector<shared_ptr<Object>> GetObjects(Vector2f pos, int r);
+	vector<weak_ptr<Object>> GetObjectsWeak(int xPos, int yPos, int r);
+	vector<weak_ptr<Object>> GetObjectsWeak(Vector2f pos, int r);
 
 	int GetWidth();
 	int GetHeight();

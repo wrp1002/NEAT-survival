@@ -60,6 +60,7 @@ void InfoDisplay::Draw() {
 			format("X: {}  Y: {}", int(object->GetPos().x), int(object->GetPos().y)),
 		});
 
+		// selected object is Agent
 		if (shared_ptr<Agent> selectedAgent = dynamic_pointer_cast<Agent>(object)) {
 			infoText.insert(infoText.end(), {
 				format("Generation: {}", selectedAgent->GetGeneration()),
@@ -73,11 +74,19 @@ void InfoDisplay::Draw() {
 			});
 		}
 
+		// selected object is Egg
 		if (shared_ptr<Egg> selectedEgg = dynamic_pointer_cast<Egg>(object)) {
 			infoText.insert(infoText.end(), {
 				format("Generation: {}", selectedEgg->GetGeneration()),
 				format("Hatch Timer: {}", selectedEgg->GetHatchTimer()),
 				format("Health: {:.2f}", selectedEgg->GetHealth())
+			});
+		}
+
+		// selected object is Food
+		if (shared_ptr<Food> selectedFood = dynamic_pointer_cast<Food>(object)) {
+			infoText.insert(infoText.end(), {
+				format("Life: {}", selectedFood->GetLife()),
 			});
 		}
 	}

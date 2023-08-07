@@ -39,6 +39,7 @@ void Agent::Init() {
 void Agent::Print() {
 	cout << "Agent energy:" << stats.energy << " waste:" << stats.waste << endl;
 	nn->PrintNN();
+	stats.Print();
 }
 
 Agent::Agent(float x, float y, float radius, vector<string> inputLabels, vector<string> outputLabels) : Object(x, y, radius) {
@@ -62,11 +63,15 @@ void Agent::Update() {
 	}
 
 
-	vector<shared_ptr<Object>> nearbyObjects = GetNearbyObjects();
 	int nearbyFood = 0;
 	int nearbyWaste = 0;
 	int nearbyAgents = 0;
-	for (auto obj : nearbyObjects) {
+	for (auto objPtr : nearbyObjects) {
+		if (objPtr.expired())
+			continue;
+
+		shared_ptr<Object> obj = objPtr.lock();
+
 		if (obj.get() == this || pos.GetDistance(obj->GetPos()) > viewDistance)
 			continue;
 		if (obj->GetType() == "agent")
@@ -78,15 +83,18 @@ void Agent::Update() {
 	}
 
 
-	for (auto eye : eyes)
+//#pragma omp parallel for
+	for (int i = 0; i < eyes.size(); i++) {
+		auto eye = eyes[i];
 		eye->Update(nearbyObjects);
+	}
 	mouth->Update(nearbyObjects);
 
 	
 	// Get dir to bit object
 	bitObjDeltaDir = 0;
 	bitObjDir = 0;
-	bitObjDist = 0;
+	bitObjDist = viewDistance;
 	bool bitObjIsFood = false;
 	bool bitObjIsWaste = false;
 	shared_ptr<Object> bitObj = bitObjectPtr.lock();
@@ -101,6 +109,17 @@ void Agent::Update() {
 
 		if (bitObjDist >= viewDistance)
 			bitObjectPtr.reset();
+	}
+
+
+	closestAgentDir = 0;
+	closestAgentDeltaDir = 0;
+	closestAgentDist = viewDistance;
+	closestAgentPtr = GetClosestObjectOfType(nearbyObjects, "agent");
+	if (shared_ptr<Object> closestAgent = closestAgentPtr.lock()) {
+		closestAgentDir = pos.GetAngleTo(closestAgent->GetPos());
+		closestAgentDeltaDir = atan2(sin(closestAgentDir - dir), cos(closestAgentDir - dir));
+		closestAgentDist = pos.GetDistance(closestAgent->GetPos());
 	}
 
 
@@ -122,6 +141,8 @@ void Agent::Update() {
 		1.0 - bitObjDist / viewDistance,	// dist to bit object
 		(double)bitObjIsFood,				// bit object is food
 		(double)bitObjIsWaste,				// bit object is waste
+		closestAgentDeltaDir,				// dir to closest agent
+		1.0 - closestAgentDist / viewDistance,
 		eyeSpreadPercent,					// eye spread
 	};
 	for (auto eye : eyes) {
@@ -136,7 +157,8 @@ void Agent::Update() {
 
 	// extract output from NN
 	forwardSpeed = outputs[0] * stats.accSpeed;
-	rotationSpeed = ( (outputs[1] + 1.0) / 2 - (outputs[2] + 1.0) / 2 ) / 2 * maxRotationSpeed;
+	//rotationSpeed = ( (outputs[1] + 1.0) / 2 - (outputs[2] + 1.0) / 2 ) / 2 * maxRotationSpeed;
+	rotationSpeed = outputs[1] * maxRotationSpeed;
 	bool wantToReproduce = outputs[3] > 0.5 || stats.energy > 0.80;
 	bool wantsToHeal = outputs[4] > 0.5;
 	double mem1 = outputs[5];
@@ -178,8 +200,8 @@ void Agent::Update() {
 
 	double energyUsage = 0.005;
 	
-	//if (shouldReproduce)
-		//Reproduce();
+	if (shouldReproduce)
+		Reproduce();
 
 	// healing
 	healing = false;
@@ -200,6 +222,16 @@ void Agent::Update() {
 		wantToReproduce = false;
 	}
 
+
+	// if hurt reduce speed
+	if (IsHurt()) {
+		forwardSpeed /= 2.0;
+		rotationSpeed /= 2.0;
+		stats.hurtTimer--;
+		wantsToBoost = false;
+	}
+
+
 	energyUsage += abs(outputs[0]) * 0.005 * stats.sizeGene * (1.0 + wantsToBoost * 5.0);
 	energyUsage += abs(outputs[1]) * 0.005 * stats.sizeGene;
 	
@@ -218,7 +250,7 @@ void Agent::Update() {
 	dir += rotationSpeed;
 	dir = fmod(dir, 2 * M_PI);
 	acc = Vector2f(cos(dir) * forwardSpeed, -sin(dir) * forwardSpeed);
-	acc *= (1 + wantsToBoost);
+	acc *= (1 + wantsToBoost * 1.5);
 	vel += acc;
 	vel *= dragCoef;
 
@@ -241,7 +273,7 @@ void Agent::Update() {
 		int amount = Globals::RandomInt(1, 3);
 		for (int i = 0; i < amount; i++) {
 			if (stats.waste > 10.0) {
-				GameManager::SpawnFood(pos + Vector2f::FromDir(dir + M_PI, radius), 10.0, Food::WASTE);
+				ObjectSpawnQueue::SpawnFood(pos + Vector2f::FromDir(dir + M_PI, radius), 10.0, Food::WASTE);
 				stats.waste -= 10.0;
 			}
 			else
@@ -273,13 +305,13 @@ void Agent::Update() {
 		while (total >= Food::MAX_ENERGY) {
 			double size = Globals::RandomInt(Food::MAX_ENERGY / 2, Food::MAX_ENERGY);
 			if (Globals::RandomInt(0, 1) == 0)
-				GameManager::SpawnFood(pos, size, Food::FOOD);
+				ObjectSpawnQueue::SpawnFood(pos, size, Food::MEAT);
 			else
-				GameManager::SpawnFood(pos, size, Food::WASTE);
+				ObjectSpawnQueue::SpawnFood(pos, size, Food::WASTE);
 			total -= size;
 		}
 		if (total > 0)
-			GameManager::SpawnFood(pos, total);
+			ObjectSpawnQueue::SpawnFood(pos, total, Food::MEAT);
 
 	}
 	
@@ -309,6 +341,10 @@ void Agent::Draw() {
 	al_draw_line(pos.x, pos.y, pos.x + cos(bitObjDir) * 20, pos.y - sin(bitObjDir) * 20, al_map_rgb(255, 0, 0), 2);
 	al_draw_line(pos.x, pos.y, pos.x + cos(bitObjDeltaDir) * 20, pos.y - sin(bitObjDeltaDir) * 20, al_map_rgb(255, 0, 255), 2);
 
+	if (IsHurt()) {
+		al_draw_filled_circle(pos.x, pos.y, radius * 2, al_map_rgba(100, 0, 0, 20));
+	}
+
 }
 
 void Agent::CollisionEvent(shared_ptr<Object> other) {
@@ -325,19 +361,61 @@ void Agent::CollisionEvent(shared_ptr<Object> other) {
 	}
 }
 
-void Agent::Reproduce() {
-	shared_ptr<NEAT> newNN = nn->Copy();
-	shared_ptr<Agent> child = GameManager::SpawnAgent(pos.x, pos.y, newNN);
-	child->Mutate();
-	child->SetGeneration(generation + 1);
-	child->SetGenes(stats.genes);
-	child->MutateGenes();
-
-	double childEnergy = stats.energy / 2;
-	child->SetEnergy(childEnergy / 2);
-	child->SetHealth(childEnergy / 2);
-	stats.energy /= 2;
+void Agent::SetNearbyObjects(vector<weak_ptr<Object>> nearbyObjects) {
+	this->nearbyObjects = nearbyObjects;
 }
+
+void Agent::Reproduce() {
+	shared_ptr<NEAT> newNN = CopyNN();
+	newNN->Mutate();
+
+	AgentStats eggStats = AgentStats(this->stats);
+	eggStats.Mutate();
+	vector<float> genes = eggStats.genes;
+
+	double totalEggEnergy = this->stats.energy / 2.0;
+	double eggHealth = totalEggEnergy / 2.0;
+	double eggEnergy = totalEggEnergy / 2.0;
+	float radius = this->radius / 2;
+	int generation = this->generation + 1;
+
+	shared_ptr<Egg> newEgg = make_shared<Egg>(Egg(genes, newNN, eggEnergy, eggHealth, generation, pos, radius));
+	SetEnergy(this->stats.energy - totalEggEnergy);
+
+	ObjectSpawnQueue::AddObject(newEgg);
+}
+
+void Agent::EatPlant(double amount) {
+	double newEnergy = amount * (double)stats.dietPlantCoef;
+	double newWaste = amount - newEnergy;
+
+	/*
+	cout << "eat plant " << amount << endl;
+	cout << "new energy: " << newEnergy << endl;
+	cout << "new waste: " << newWaste << endl;
+	*/
+
+	AddEnergy(newEnergy);
+	AddWaste(newWaste);
+	stats.EnergyToWaste(1.0);
+}
+
+
+void Agent::EatMeat(double amount) {
+	double newEnergy = amount * (double)stats.dietMeatCoef;
+	double newWaste = amount - newEnergy;
+
+	/*
+	cout << "eat meat " << amount << endl;
+	cout << "new energy: " << newEnergy << endl;
+	cout << "new waste: " << newWaste << endl;
+	*/
+
+	AddEnergy(newEnergy);
+	AddWaste(newWaste);
+	stats.EnergyToWaste(1.0);
+}
+
 
 void Agent::SetGenes(vector<float> newGenes) {
 	stats.SetGenes(newGenes);
@@ -380,16 +458,17 @@ void Agent::MutateRemoveNode() {
 	nn->MutateRemoveNode();
 }
 
-vector<shared_ptr<Object>> Agent::GetNearbyObjects() {
-	vector<shared_ptr<Object>> foundObjects = GameManager::collisionGrid.GetObjects(pos, 1);
-	return foundObjects;
-}
 
-shared_ptr<Object> Agent::GetClosestObjectOfType(vector<shared_ptr<Object>> nearbyObjects, string type) {
+shared_ptr<Object> Agent::GetClosestObjectOfType(vector<weak_ptr<Object>> nearbyObjects, string type) {
 	float minDist = 100000;
 	shared_ptr<Object> closest = nullptr;
 
-	for (auto object : nearbyObjects) {
+	for (auto objectPtr : nearbyObjects) {
+		if (objectPtr.expired())
+			continue;
+
+		shared_ptr<Object> object = objectPtr.lock();
+
 		if (object->GetType() != type || object.get() == this)
 			continue;
 
@@ -426,7 +505,7 @@ void Agent::SetGeneration(int newGeneration) {
 void Agent::AddEnergy(double amount) {
 	stats.energy += amount;
 	if (stats.energy > stats.maxEnergy) {
-		double overflow = stats.energy - stats.maxEnergy;
+		double overflow = stats.maxEnergy - stats.energy;
 		stats.energy -= overflow;
 		stats.waste += overflow;
 	}
@@ -442,6 +521,15 @@ void Agent::AddWaste(double amount) {
 
 void Agent::HealthToWaste(double amount) {
 	stats.HealthToWaste(amount);
+}
+
+void Agent::TakeDamage(double amount) {
+	stats.health -= amount;
+	stats.hurtTimer = stats.hurtTimerStart;
+}
+
+void Agent::SetWaste(double amount) {
+	stats.waste = amount;
 }
 
 int Agent::GetGeneration() {
@@ -474,6 +562,14 @@ float Agent::GetDamage() {
 
 bool Agent::ShouldReproduce() {
 	return shouldReproduce;
+}
+
+bool Agent::IsHurt() {
+	return stats.hurtTimer > 0;
+}
+
+bool Agent::IsDead() {
+	return stats.health <= 0;
 }
 
 AgentStats Agent::GetAgentStats() {
