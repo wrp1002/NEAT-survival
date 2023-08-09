@@ -1,7 +1,7 @@
 #include "Agent.h"
 
 #include "UserInput.h"
-#include "ObjectManager.h"
+#include "GameManager.h"
 #include "GameRules.h"
 #include "Food.h"
 

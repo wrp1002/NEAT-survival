@@ -181,7 +181,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Agent.h" />
-    <ClInclude Include="AgentManager.h" />
+    <ClInclude Include="GameManager.h" />
     <ClInclude Include="AgentStats.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CollisionGrid.h" />
@@ -213,8 +213,8 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\AllegroDeps.1.12.0\build\native\AllegroDeps.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AllegroDeps.1.12.0\build\native\AllegroDeps.targets'))" />
-    <Error Condition="!Exists('..\packages\Allegro.5.2.7\build\native\Allegro.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Allegro.5.2.7\build\native\Allegro.targets'))" />
-    <Error Condition="!Exists('..\packages\Eigen.3.3.3\build\native\Eigen.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Eigen.3.3.3\build\native\Eigen.targets'))" />
+    <Error Condition="!Exists('..\packages\AllegroDeps.1.12.0\build\native\AllegroDeps.targets')" Text="$([System.String]::fmt::format('$(ErrorText)', '..\packages\AllegroDeps.1.12.0\build\native\AllegroDeps.targets'))" />
+    <Error Condition="!Exists('..\packages\Allegro.5.2.7\build\native\Allegro.targets')" Text="$([System.String]::fmt::format('$(ErrorText)', '..\packages\Allegro.5.2.7\build\native\Allegro.targets'))" />
+    <Error Condition="!Exists('..\packages\Eigen.3.3.3\build\native\Eigen.targets')" Text="$([System.String]::fmt::format('$(ErrorText)', '..\packages\Eigen.3.3.3\build\native\Eigen.targets'))" />
   </Target>
 </Project>

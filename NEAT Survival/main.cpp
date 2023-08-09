@@ -8,7 +8,7 @@
 #include "Globals.h"
 #include "UserInput.h"
 #include "Agent.h"
-#include "ObjectManager.h"
+#include "GameManager.h"
 #include "InfoDisplay.h"
 #include "Camera.h"
 #include "Vector2f.h"

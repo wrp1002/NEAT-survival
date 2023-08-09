@@ -5,7 +5,7 @@
 #include "Globals.h"
 #include "Object.h"
 #include "Font.h"
-#include "ObjectManager.h"
+#include "GameManager.h"
 #include "Vector2f.h"
 #include "Agent.h"
 #include "Egg.h"
@@ -54,15 +54,15 @@ void InfoDisplay::Draw() {
 
 
 	infoText.insert(infoText.end(), {
-		format("Food: {}", GameManager::allFood.size()),
-		format("Objects: {}", GameManager::allObjects.size()),
-		format("Agents: {}", GameManager::agents.size()),
+		fmt::format("Food: {}", GameManager::allFood.size()),
+		fmt::format("Objects: {}", GameManager::allObjects.size()),
+		fmt::format("Agents: {}", GameManager::agents.size()),
 
-		format("Sim Time: {}", GameManager::GetSimTicksStr()),
-		format("Speed: {}x", GameManager::GetSpeed()),
-		format("R Time: {}", GameManager::GetSimTimeStr()),
-		
-		format("Total En: {:.2f}", GameManager::GetTotalEnergy()),
+		fmt::format("Sim Time: {}", GameManager::GetSimTicksStr()),
+		fmt::format("Speed: {}x", GameManager::GetSpeed()),
+		fmt::format("R Time: {}", GameManager::GetSimTimeStr()),
+
+		fmt::format("Total En: {:.2f}", GameManager::GetTotalEnergy()),
 	});
 
 
@@ -70,15 +70,15 @@ void InfoDisplay::Draw() {
 		shared_ptr<Object> object = selectedObject.lock();
 
 		infoText.insert(infoText.end(), {
-			format("Energy: {:.2f}", object->GetEnergy()),
-			format("X: {}  Y: {}", int(object->GetPos().x), int(object->GetPos().y)),
+			fmt::format("Energy: {:.2f}", object->GetEnergy()),
+			fmt::format("X: {}  Y: {}", int(object->GetPos().x), int(object->GetPos().y)),
 		});
 
 		if (shared_ptr<Agent> selectedAgent = dynamic_pointer_cast<Agent>(object)) {
 			infoText.insert(infoText.end(), {
-				format("Generation: {}", selectedAgent->GetGeneration()),
-				format("Health: {:.2f}%", selectedAgent->GetHealthPercent() * 100),
-				format("Age: {:.2f}", selectedAgent->GetAge())
+				fmt::format("Generation: {}", selectedAgent->GetGeneration()),
+				fmt::format("Health: {:.2f}%", selectedAgent->GetHealthPercent() * 100),
+				fmt::format("Age: {:.2f}", selectedAgent->GetAge())
 			});
 
 			infoText.insert(infoText.end(), {
@@ -89,9 +89,9 @@ void InfoDisplay::Draw() {
 
 		if (shared_ptr<Egg> selectedEgg = dynamic_pointer_cast<Egg>(object)) {
 			infoText.insert(infoText.end(), {
-				format("Generation: {}", selectedEgg->GetGeneration()),
-				format("Hatch Timer: {}", selectedEgg->GetHatchTimer()),
-				format("Health: {:.2f}", selectedEgg->GetHealth())
+				fmt::format("Generation: {}", selectedEgg->GetGeneration()),
+				fmt::format("Hatch Timer: {}", selectedEgg->GetHatchTimer()),
+				fmt::format("Health: {:.2f}", selectedEgg->GetHealth())
 			});
 		}
 	}
