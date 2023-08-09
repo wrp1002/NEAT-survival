@@ -4,12 +4,10 @@
 #include <memory>
 #include <iostream>
 
-#include "Globals.h"
 #include "Object.h"
-#include "Food.h"
-#include "GameRules.h"
 
 class Agent;
+class Food;
 
 using namespace std;
 

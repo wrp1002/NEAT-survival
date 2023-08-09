@@ -1,18 +1,29 @@
 #include "Agent.h"
 
+#include "UserInput.h"
+#include "ObjectManager.h"
+#include "GameRules.h"
+#include "Food.h"
+
+
+#include "NEAT.h"
+#include "Eye.h"
+#include "TriangleEye.h"
+#include "Mouth.h"
+
 
 void Agent::Init() {
 	forwardSpeed = 0;
 	rotationSpeed = 0;
 	dir = Globals::RandomDir();
 	objectType = "agent";
-	
+
 	generation = 1;
 
 	digestTimeStart = 500;
 	digestTime = digestTimeStart;
 	healing = false;
-	
+
 	// random color for now
 	SetColor(al_map_rgb(Globals::RandomInt(0, 255), Globals::RandomInt(0, 255), Globals::RandomInt(0, 255)));
 
@@ -52,7 +63,7 @@ Agent::Agent(float x, float y, float radius, shared_ptr<NEAT> newNN) : Object(x,
 
 
 Agent::~Agent() {
-	
+
 }
 
 void Agent::Update() {
@@ -82,7 +93,7 @@ void Agent::Update() {
 		eye->Update(nearbyObjects);
 	mouth->Update(nearbyObjects);
 
-	
+
 	// Get dir to bit object
 	bitObjDeltaDir = 0;
 	bitObjDir = 0;
@@ -168,7 +179,7 @@ void Agent::Update() {
 		// update eye angles
 		for (auto eye : eyes)
 			eye->SetSpreadPercent(eyeSpreadPercent);
-		
+
 	}
 	else {
 		for (auto eye : eyes)
@@ -177,7 +188,7 @@ void Agent::Update() {
 
 
 	double energyUsage = 0.005;
-	
+
 	//if (shouldReproduce)
 		//Reproduce();
 
@@ -202,7 +213,7 @@ void Agent::Update() {
 
 	energyUsage += abs(outputs[0]) * 0.005 * stats.sizeGene * (1.0 + wantsToBoost * 5.0);
 	energyUsage += abs(outputs[1]) * 0.005 * stats.sizeGene;
-	
+
 
 	// energy usage
 	if (energyUsage < stats.energy) {
@@ -226,7 +237,7 @@ void Agent::Update() {
 	// mouth control
 	if (!GameRules::IsRuleEnabled("MouthControl"))
 		wantsToEat = true;
-	
+
 	mouth->SetWantsToBite(wantsToEat);
 	if (wantsToEat && mouth->CanBite() && mouth->ObjectInMouth()) {
 		mouth->Bite();
@@ -269,7 +280,7 @@ void Agent::Update() {
 		alive = false;
 
 		double total = stats.energy + stats.waste + stats.health;
-		
+
 		while (total >= Food::MAX_ENERGY) {
 			double size = Globals::RandomInt(Food::MAX_ENERGY / 2, Food::MAX_ENERGY);
 			if (Globals::RandomInt(0, 1) == 0)
@@ -282,7 +293,7 @@ void Agent::Update() {
 			GameManager::SpawnFood(pos, total);
 
 	}
-	
+
 }
 
 void Agent::Draw() {
@@ -296,7 +307,7 @@ void Agent::Draw() {
 	mouth->Draw();
 
 	al_draw_filled_circle(pos.x, pos.y, radius, color);
-	
+
 	int lineLen = radius*2 + forwardSpeed;
 
 	if (healing) {
@@ -312,17 +323,17 @@ void Agent::Draw() {
 }
 
 void Agent::CollisionEvent(shared_ptr<Object> other) {
+	/*
 	if (shared_ptr<Food> food = dynamic_pointer_cast<Food>(other)) {
 		if (!food->IsAlive() || !IsAlive())
 			return;
 
-		/*
 		else if (food->IsFood()) {
 			energy += food->GetEnergy();
 			food->SetAlive(false);
 		}
-		*/
 	}
+	*/
 }
 
 void Agent::Reproduce() {

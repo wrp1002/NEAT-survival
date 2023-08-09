@@ -1,5 +1,7 @@
 #include "AgentStats.h"
 
+#include "Globals.h"
+
 AgentStats::AgentStats() {
 	rGene = 0;
 	gGene = 0;
@@ -62,7 +64,7 @@ void AgentStats::SetGenes(vector<float> newGenes) {
 	maxEnergy = sizeGene * 200.0;
 	size = sizeGene * 15.0 + 5;
 	damage = sizeGene * 20.0;
-	
+
 	health = maxHealth / 2;
 	energy = maxEnergy / 2;
 

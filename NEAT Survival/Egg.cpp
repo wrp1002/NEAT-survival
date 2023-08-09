@@ -1,5 +1,8 @@
 #include "Egg.h"
 
+#include "NEAT.h"
+#include "Vector2f.h"
+
 Egg::Egg(vector<float> genes, shared_ptr<NEAT> nn, double health, double energy, int generation, Vector2f pos, float radius) : Object(pos.x, pos.y, radius) {
 	this->genes = genes;
 	this->nn = nn;

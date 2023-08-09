@@ -1,9 +1,11 @@
 #pragma once
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
+#include <iostream>
 
 #include "Object.h"
-#include "Globals.h"
+
+using namespace std;
 
 class Food : public Object {
 private:

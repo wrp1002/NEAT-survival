@@ -2,9 +2,10 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <memory>
 
-#include "Node.h"
-#include "Connection.h"
+class Node;
+class Connection;
 
 using namespace std;
 

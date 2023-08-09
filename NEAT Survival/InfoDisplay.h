@@ -4,18 +4,15 @@
 #include <allegro5/color.h>
 
 #include <iostream>
-#include <format>
 #include <string>
 #include <typeinfo>
+#include <memory>
+#include <vector>
 
-#include "Globals.h"
-#include "Object.h"
-#include "Font.h"
-#include "AgentManager.h"
-#include "Vector2f.h"
-#include "Agent.h"
-#include "NEAT.h"
-#include "Egg.h"
+class Object;
+class NEAT;
+class Node;
+class Vector2f;
 
 using namespace std;
 
@@ -31,6 +28,7 @@ namespace InfoDisplay {
 	void Hide();
 	void Draw();
 	void SelectObject(weak_ptr<Object>);
+	void DrawNodes(vector<shared_ptr<Node>> nodes, shared_ptr<Node> hoveredNode, float alphaCoef, bool drawWeights);
 	string DrawNN(shared_ptr<NEAT> nn);
 
 	Vector2f CalculateNodePos(shared_ptr<Node> node);

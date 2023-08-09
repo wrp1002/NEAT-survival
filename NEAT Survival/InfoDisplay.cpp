@@ -1,5 +1,19 @@
 #include "InfoDisplay.h"
 
+#include <fmt/core.h>
+
+#include "Globals.h"
+#include "Object.h"
+#include "Font.h"
+#include "ObjectManager.h"
+#include "Vector2f.h"
+#include "Agent.h"
+#include "Egg.h"
+
+#include "NEAT.h"
+#include "Node.h"
+#include "Connection.h"
+
 ALLEGRO_DISPLAY* InfoDisplay::display = nullptr;
 ALLEGRO_EVENT_QUEUE* InfoDisplay::event_queue = nullptr;
 weak_ptr<Object> InfoDisplay::selectedObject;
@@ -94,7 +108,7 @@ void InfoDisplay::Draw() {
 			x = screenSize.x - 10;
 		}
 		if (index == 1) {
-			
+
 		}
 		if (index == 2) {
 			flags = ALLEGRO_ALIGN_CENTRE;

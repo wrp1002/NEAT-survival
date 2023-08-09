@@ -1,5 +1,10 @@
 #include "Mouth.h"
+
+#include "Globals.h"
+#include "GameRules.h"
+
 #include "Agent.h"
+#include "Food.h"
 
 Mouth::Mouth(shared_ptr<Agent> parent, float radius) {
 	this->parentPtr = parent;
@@ -23,7 +28,7 @@ void Mouth::Update(vector<shared_ptr<Object>> nearbyObjects) {
 		cout << "mouth tried to update with null parent" << endl;
 		return;
 	}
-	
+
 	collidingObjectPtr.reset();
 	for (auto obj : nearbyObjects) {
 		if (CollidesWith(obj) && obj != parentPtr.lock()) {

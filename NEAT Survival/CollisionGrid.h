@@ -3,12 +3,12 @@
 
 #include <vector>
 #include <iostream>
+#include <memory>
 
-#include "Object.h"
 #include "Globals.h"
-#include "Font.h"
-#include "Camera.h"
-#include "Vector2f.h"
+
+class Vector2f;
+class Object;
 
 using namespace std;
 

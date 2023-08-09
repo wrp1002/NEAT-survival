@@ -5,7 +5,6 @@
 #include <memory>
 
 #include "Object.h"
-#include "Globals.h"
 #include "Vector2f.h"
 
 

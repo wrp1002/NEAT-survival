@@ -1,5 +1,7 @@
 #include "Eye.h"
+
 #include "Agent.h"
+#include "Object.h"
 
 bool Eye::Intersects(shared_ptr<Object> object, Vector2f startPos, Vector2f endPos) {
 	// Check if eye is facing towards object

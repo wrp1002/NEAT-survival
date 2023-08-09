@@ -1,10 +1,13 @@
 #pragma once
 #include <allegro5/allegro_primitives.h>
-#include <iostream>
 
-#include "AgentStats.h"
+#include <iostream>
+#include <memory>
+
 #include "Object.h"
-#include "NEAT.h"
+
+class NEAT;
+class Vector2f;
 
 using std::cout, std::endl;
 

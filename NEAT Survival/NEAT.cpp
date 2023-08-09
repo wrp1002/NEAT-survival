@@ -1,5 +1,9 @@
 #include "NEAT.h"
 
+#include "Globals.h"
+#include "Node.h"
+#include "Connection.h"
+
 void NEAT::_RemoveNode(vector<shared_ptr<Node>>* nodes, shared_ptr<Node> nodeToRemove) {
 	for (unsigned int i = 0; i < nodes->size(); i++) {
 		if (nodes->at(i) == nodeToRemove) {
@@ -67,7 +71,7 @@ shared_ptr<NEAT> NEAT::Copy() {
 			int toID = connection->GetTo()->GetID();
 			shared_ptr<Node> fromNode;
 			shared_ptr<Node> toNode;
-			
+
 			for (shared_ptr<Node> testNode : newNodes) {
 				int ID = testNode->GetID();
 				if (ID == fromID)
@@ -95,7 +99,7 @@ shared_ptr<NEAT> NEAT::Copy() {
 		}
 
 	}
-	
+
 
 	return nn;
 }
@@ -110,7 +114,7 @@ vector<shared_ptr<Connection>> NEAT::GetConnections() {
 
 void NEAT::PrintNN() {
 	cout << "nodes:" << allNodes.size() << " input:" << inputNodes.size() << " output:" << outputNodes.size() << endl;
-	
+
 	for (auto node : allNodes) {
 		cout << "node " << node->GetID() << " type:" << node->GetType() << " X:" << node->GetPos().x << " Y:" << node->GetPos().y << endl;
 		cout << "connections:" << node->GetAllConnections().size() << " toConnections:" << node->GetToConnections().size() << " fromConnections:" << node->GetFromConnections().size() << endl;
@@ -119,7 +123,7 @@ void NEAT::PrintNN() {
 		}
 		cout << endl;
 	}
-	
+
 	cout << endl;
 	cout << "connections:" << connections.size() << endl;
 	for (auto connection : connections) {
@@ -228,7 +232,7 @@ void NEAT::RemoveConnection(shared_ptr<Connection> connection) {
 		connection->GetFrom()->RemoveConnection(connection);
 	if (toNode)
 		connection->GetTo()->RemoveConnection(connection);
-	
+
 	for (unsigned i = 0; i < connections.size(); i++) {
 		if (connections[i] == connection) {
 			connections.erase(connections.begin() + i);
@@ -270,15 +274,15 @@ void NEAT::Mutate() {
 		}
 	}
 
-	
+
 	if (Globals::Random() < PROBABILITY_MUTATE_ADD_CONNECTION * MUTATE_COEF)
 		MutateAddConnection();
-	
+
 	if (Globals::Random() < PROBABILITY_MUTATE_ADD_NODE * MUTATE_COEF)
 		MutateAddNode();
-	
-	
-	//if (Globals::Random() < PROBABILITY_MUTATE_REMOVE_NODE * MUTATE_COEF) 
+
+
+	//if (Globals::Random() < PROBABILITY_MUTATE_REMOVE_NODE * MUTATE_COEF)
 	//	MutateRemoveNode();
 }
 
@@ -323,7 +327,7 @@ void NEAT::MutateAddNode() {
 	shared_ptr<Node> toNode = connection->GetTo();
 	Vector2f fromPos = fromNode->GetPos();
 	Vector2f toPos = toNode->GetPos();
-	
+
 	// create new node at center of connection
 	shared_ptr<Node> newNode = make_shared<Node>(Node((fromPos.x + toPos.x) / 2, (fromPos.y + toPos.y) / 2 + (Globals::Random() * 0.2) - 0.1, Node::HIDDEN, currentNodeID, "Hidden Node"));
 	AddNode(newNode);

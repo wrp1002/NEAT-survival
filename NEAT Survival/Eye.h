@@ -5,8 +5,8 @@
 #include <vector>
 
 #include "Vector2f.h"
-#include "Object.h"
 
+class Object;
 class Agent;
 
 using namespace std;

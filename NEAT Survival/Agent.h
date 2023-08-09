@@ -4,18 +4,16 @@
 #include <allegro5/allegro_color.h>
 
 #include "Object.h"
-#include "NEAT.h"
-#include "UserInput.h"
-#include "AgentManager.h"
-#include "Food.h"
-#include "Eye.h"
-#include "Mouth.h"
 #include "AgentStats.h"
-#include "GameRules.h"
-#include "TriangleEye.h"
 
 #include <iostream>
 #include <memory>
+
+class NEAT;
+class Eye;
+class TriangleEye;
+class Mouth;
+class AgentStats;
 
 using namespace std;
 
@@ -36,7 +34,7 @@ private:
 	shared_ptr<Mouth> mouth;
 	float eyeSpreadPercent, eyeSpreadMax;
 	float viewDistance;
-	
+
 	float dirToFood, dirToAgent;
 	float forwardSpeed, rotationSpeed;
 	int generation;

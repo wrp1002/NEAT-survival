@@ -1,5 +1,9 @@
 #include "Camera.h"
 
+#include "Vector2f.h"
+#include "Globals.h"
+#include "Object.h"
+
 Vector2f Camera::pos(Globals::mapWidth / 2 - Globals::screenWidth / 2, Globals::mapHeight / 2 - Globals::screenHeight / 2);
 float Camera::zoom = 1.0;
 float Camera::zoomFactor = 0.2;
@@ -27,7 +31,7 @@ void Camera::UpdateTransform() {
 	//	al_translate_transform(&t, followObject->GetPos().x, followObject->GetPos().y);
 	//else
 	al_translate_transform(&t, cameraPos.x + Globals::screenWidth / 2, cameraPos.y + Globals::screenHeight / 2);
-	
+
 	al_use_transform(&t);
 }
 

@@ -1,5 +1,7 @@
 #include "Font.h"
 
+#include "Globals.h"
+
 unordered_map<string, ALLEGRO_FONT*> Font::fonts;
 
 ALLEGRO_FONT* Font::GetFont(string fontName, int fontSize) {

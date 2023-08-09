@@ -1,5 +1,10 @@
 #include "CollisionGrid.h"
 
+#include "Object.h"
+#include "Font.h"
+#include "Camera.h"
+#include "Vector2f.h"
+
 void CollisionGrid::_RemoveObject(shared_ptr<Object> object, int x, int y) {
 	if (x < 0 || x > width - 1 || y < 0 || y > height - 1)
 		return;

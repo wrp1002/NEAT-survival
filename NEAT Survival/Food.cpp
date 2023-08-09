@@ -1,5 +1,7 @@
 #include "Food.h"
 
+#include "Globals.h"
+
 void Food::ConvertToFood() {
 	objectType = "food";
 	SetColor(al_map_rgb(0, 255, 0));
@@ -22,7 +24,7 @@ Food::Food(Vector2f startingPos, double startingEnergy, int newType) : Object(st
 	energy = startingEnergy;
 	foodType = newType;
 	life = 1000 + rand() % 500;
-	
+
 	pos.x += Globals::Random() * 5 - 2.5;
 	pos.y += Globals::Random() * 5 - 2.5;
 
@@ -36,7 +38,7 @@ Food::Food(Vector2f startingPos, double startingEnergy, int newType) : Object(st
 		ConvertToWaste();
 	else if (foodType == MEAT)
 		ConvertToMeat();
-	
+
 	//cout << "New food" << pos.x << pos.y << endl;
 }
 

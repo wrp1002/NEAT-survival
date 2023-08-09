@@ -4,6 +4,7 @@
 #include <math.h>
 #include <string>
 #include <iostream>
+#include <memory>
 
 #include "Vector2f.h"
 

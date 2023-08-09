@@ -1,5 +1,8 @@
 #include "Object.h"
 
+#include "Globals.h"
+#include "ObjectManager.h"
+
 Object::Object() : pos(0,0), vel(0,0), acc(0,0) {
 	this->radius = 0;
 	this->prevPos = pos;

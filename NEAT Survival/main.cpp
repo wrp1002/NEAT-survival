@@ -5,15 +5,16 @@
 
 #include <iostream>
 
-#include "Globals.h" 
+#include "Globals.h"
 #include "UserInput.h"
 #include "Agent.h"
-#include "AgentManager.h"
+#include "ObjectManager.h"
 #include "InfoDisplay.h"
 #include "Camera.h"
 #include "Vector2f.h"
 #include "Font.h"
 #include "GameRules.h"
+#include "Object.h"
 
 using namespace std;
 
@@ -168,7 +169,7 @@ int main() {
 		}
 		else if (ev.type == ALLEGRO_EVENT_TIMER) {
 			redraw = true;
-			
+
 			if (al_get_time() - lastRedrawTime > maxRedrawTime) {
 				cout << "Last redraw was more than " << maxRedrawTime << " seconds ago" << endl;
 				cout << "Clearing event queue and lowering speed to " << (GameManager::GetSpeed() > 1 ? GameManager::GetSpeed() - 1 : 1) << endl;

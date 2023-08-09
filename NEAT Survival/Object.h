@@ -5,9 +5,11 @@
 #include <allegro5/allegro_color.h>
 #include <iostream>
 #include <string>
+#include <memory>
+#include <vector>
+
 
 #include "Vector2f.h"
-#include "Globals.h"
 
 using namespace std;
 

@@ -5,8 +5,6 @@
 #include <vector>
 #include <iostream>
 
-#include "Globals.h"
-
 using namespace std;
 
 class AgentStats {

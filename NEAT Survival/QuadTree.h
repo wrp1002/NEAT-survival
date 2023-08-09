@@ -6,8 +6,7 @@
 #include <vector>
 #include <iostream>
 
-#include "Object.h"
-#include "Font.h"
+class Object;
 
 using namespace std;
 

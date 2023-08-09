@@ -1,10 +1,11 @@
 #pragma once
 #include <allegro5/allegro.h>
 #include "UserInput.h"
-#include "Vector2f.h"
-#include "Globals.h"
-#include "Object.h"
 
+#include <memory>
+
+class Vector2f;
+class Object;
 
 namespace Camera {
 	extern Vector2f pos;

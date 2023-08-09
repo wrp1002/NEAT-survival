@@ -1,5 +1,7 @@
 #include "Connection.h"
 
+#include "Node.h"
+#include "Globals.h"
 
 Connection::Connection(shared_ptr<Node> from, shared_ptr<Node> to) {
 	this->fromNode = from;

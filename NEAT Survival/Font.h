@@ -6,8 +6,6 @@
 #include <unordered_map>
 #include <string>
 
-#include "Globals.h"
-
 using namespace std;
 
 namespace Font {

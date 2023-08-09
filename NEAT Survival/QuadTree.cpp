@@ -1,5 +1,8 @@
 #include "QuadTree.h"
 
+#include "Font.h"
+#include "Object.h"
+
 QuadTree::QuadTree(int w, int h) {
 	this->x = 0;
 	this->y = 0;
@@ -69,7 +72,7 @@ void QuadTree::HandleCollisions() {
 
 	if (objects.size() < 2)
 		return;
-	
+
 	/*
 	for (unsigned i = 0; i < objects.size() - 1; i++) {
 		for (unsigned j = i + 1; j < objects.size(); j++) {
