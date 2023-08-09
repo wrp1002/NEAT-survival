@@ -48,6 +48,10 @@ bool Object::CollidesWith(shared_ptr<Object> other) {
 	return (pos.GetDistance(other->GetPos()) < (radius + other->GetRadius()));
 }
 
+vector<shared_ptr<Object>> Object::GetNearbyObjects(int range, string type) {
+	return GameManager::collisionGrid.GetObjects(pos, range, type);
+}
+
 bool Object::CollidesWith(Vector2f point) {
 	return (pos.GetDistance(point) < radius);
 }

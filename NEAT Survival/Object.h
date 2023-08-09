@@ -49,6 +49,7 @@ public:
 	float GetAngleTo(shared_ptr<Object> other);
 	float GetAngleTo(Vector2f other);
 	bool IsAlive();
+	vector<shared_ptr<Object>> GetNearbyObjects(int range, string type = "");
 
 	Vector2f GetPos();
 	Vector2f GetPrevPos();

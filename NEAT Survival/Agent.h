@@ -45,7 +45,6 @@ private:
 	weak_ptr<Object> damageObjectPtr;
 	float damageObjDir, damageObjDeltaDir, damageObjDist;
 
-	vector<shared_ptr<Object>> GetNearbyObjects();
 	shared_ptr<Object> GetClosestObjectOfType(vector<shared_ptr<Object>> nearbyObjects, string type);
 
 public:

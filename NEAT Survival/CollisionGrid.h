@@ -34,8 +34,8 @@ public:
 	bool InBounds(int x, int y);
 
 	shared_ptr<Object> GetCollidingObject(Vector2f pos);
-	vector<shared_ptr<Object>> GetObjects(int xPos, int yPos, int r);
-	vector<shared_ptr<Object>> GetObjects(Vector2f pos, int r);
+	vector<shared_ptr<Object>> GetObjects(int xPos, int yPos, int r, string type = "");
+	vector<shared_ptr<Object>> GetObjects(Vector2f pos, int r, string type = "");
 
 	int GetWidth();
 	int GetHeight();

@@ -73,7 +73,7 @@ void Agent::Update() {
 	}
 
 
-	vector<shared_ptr<Object>> nearbyObjects = GetNearbyObjects();
+	vector<shared_ptr<Object>> nearbyObjects = GetNearbyObjects(1);
 	int nearbyFood = 0;
 	int nearbyWaste = 0;
 	int nearbyAgents = 0;
@@ -389,11 +389,6 @@ void Agent::MutateAddNode() {
 
 void Agent::MutateRemoveNode() {
 	nn->MutateRemoveNode();
-}
-
-vector<shared_ptr<Object>> Agent::GetNearbyObjects() {
-	vector<shared_ptr<Object>> foundObjects = GameManager::collisionGrid.GetObjects(pos, 1);
-	return foundObjects;
 }
 
 shared_ptr<Object> Agent::GetClosestObjectOfType(vector<shared_ptr<Object>> nearbyObjects, string type) {
