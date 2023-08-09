@@ -121,40 +121,100 @@ void InfoDisplay::Draw() {
 	al_flip_display();
 }
 
-string InfoDisplay::DrawNN(shared_ptr<NEAT> nn) {
-	string selectedNodeName = "";
+vector<shared_ptr<Node>> GetConnectedNodes(shared_ptr<Node> node) {
+	vector<shared_ptr<Node>> nodes = { node };
 
-	for (auto node : nn->GetNodes()) {
+	for (auto connection : node->GetToConnections()) {
+		shared_ptr<Node> connectedNode = connection->GetTo();
+		vector<shared_ptr<Node>> connectedNodes = GetConnectedNodes(connectedNode);
+		nodes.insert(nodes.end(), connectedNodes.begin(), connectedNodes.end());
+	}
+
+	return nodes;
+}
+
+void InfoDisplay::DrawNodes(vector<shared_ptr<Node>> nodes, shared_ptr<Node> hoveredNode, float alphaCoef, bool drawWeights) {
+	for (auto node : nodes) {
 		Vector2f realPos = CalculateNodePos(node);
 
 		float distance = realPos.GetDistance(mousePos);
 		int nodeSize = 10;
-		bool hovering = (distance < nodeSize);
-		
+		bool hovering = node == hoveredNode;
+
 		//cout << "X:" << node->GetX() * screenSize.x << " Y:" << node->GetY() * screenSize.y << endl;
 
 		// Draw connections coming out of node
 		for (auto connection : node->GetToConnections()) {
 			Vector2f fromPos = CalculateNodePos(connection->GetFrom());
 			Vector2f toPos = CalculateNodePos(connection->GetTo());
-			ALLEGRO_COLOR color = (connection->GetEnabled() ? ( connection->GetWeight() > 0 ? al_map_rgba(50, 100, 255, 50) : al_map_rgba(255, 50, 50, 50) ) : al_map_rgba(50, 50, 50, 50) );
 			float width = abs(connection->GetWeight()) * 2 + 1;
+			ALLEGRO_COLOR color = (
+				connection->GetEnabled() ? (
+					connection->GetWeight() > 0 ?
+					al_map_rgba(50 * alphaCoef, 100 * alphaCoef, 255 * alphaCoef, 50 * alphaCoef)
+					: al_map_rgba(255 * alphaCoef, 50 * alphaCoef, 50 * alphaCoef, 50 * alphaCoef)
+				)
+				: al_map_rgba(50 * alphaCoef, 50 * alphaCoef, 50 * alphaCoef, 50 * alphaCoef)
+			);
+
 			al_draw_line(fromPos.x, fromPos.y, toPos.x, toPos.y, color, width);
-			if (hovering)
-				al_draw_text(Font::GetFont("Minecraft.ttf", 10), al_map_rgb(255, 255, 255), (fromPos.x + toPos.x) / 2, (fromPos.y + toPos.y) / 2, ALLEGRO_ALIGN_CENTER, format("{:.2f}", connection->GetWeight()).c_str());
+
+			if (drawWeights)
+				al_draw_text(Font::GetFont("Minecraft.ttf", 10), al_map_rgb(255, 255, 255), (fromPos.x + toPos.x) / 2, (fromPos.y + toPos.y) / 2, ALLEGRO_ALIGN_CENTER, fmt::format("{:.2f}", connection->GetWeight()).c_str());
 		}
 
+		if (hovering)
+			al_draw_filled_circle(realPos.x, realPos.y, nodeSize + 1, al_map_rgba(255, 255, 255, 255));
+
+		al_draw_filled_circle(
+			realPos.x,
+			realPos.y,
+			nodeSize,
+			al_map_rgba(
+				(100 - (node->GetOutput() * 100)) * alphaCoef,
+				(100 + (node->GetOutput() * 100)) * alphaCoef,
+				0,
+				255 * alphaCoef
+			)
+		);
+
 		if (hovering) {
-			al_draw_filled_circle(realPos.x, realPos.y, nodeSize + 1, al_map_rgb(255, 255, 255));
-			selectedNodeName = format("{} ({})", node->GetName(), node->GetActivationFunctionStr());
+			al_draw_text(
+				Font::GetFont("Minecraft.ttf", 10),
+				al_map_rgb(255, 255, 255), realPos.x, realPos.y - 4,
+				ALLEGRO_ALIGN_CENTER,
+				fmt::format("{:.2f}",
+				node->GetOutput()).c_str()
+			);
 		}
 
-		al_draw_filled_circle(realPos.x, realPos.y, nodeSize, al_map_rgb(100 - (node->GetOutput() * 100), 100 + (node->GetOutput() * 100), 0));
+	}
+}
 
-		if (hovering) {
-			al_draw_text(Font::GetFont("Minecraft.ttf", 10), al_map_rgb(255, 255, 255), realPos.x, realPos.y - 4, ALLEGRO_ALIGN_CENTER, format("{:.2f}", node->GetOutput()).c_str());
+string InfoDisplay::DrawNN(shared_ptr<NEAT> nn) {
+	string selectedNodeName = "";
+	int nodeSize = 10;
+	vector<shared_ptr<Node>> nodes;
+	shared_ptr<Node> hoveredNode = nullptr;
+
+	for (auto node : nn->GetNodes()) {
+		Vector2f realPos = CalculateNodePos(node);
+
+		float distance = realPos.GetDistance(mousePos);
+
+		if (distance < nodeSize) {
+			hoveredNode = node;
+			nodes = GetConnectedNodes(node);
+			selectedNodeName = fmt::format("{} ({})", node->GetName(), node->GetActivationFunctionStr());
+			break;
 		}
 	}
+
+	float firstDrawAlpha = nodes.size() ? 0.1 : 1.0;
+
+	DrawNodes(nn->GetNodes(), hoveredNode, firstDrawAlpha, false);
+	DrawNodes(nodes, hoveredNode, 1, true);
+
 	return selectedNodeName;
 }
 

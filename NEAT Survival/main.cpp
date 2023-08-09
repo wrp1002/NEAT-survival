@@ -194,7 +194,7 @@ int main() {
 		}
 
 
-		if (redraw && al_is_event_queue_empty(event_queue) || forceRedraw) {
+		if ((redraw && al_is_event_queue_empty(event_queue)) || forceRedraw) {
 			redraw = false;
 			forceRedraw = false;
 			lastRedrawTime = al_get_time();
