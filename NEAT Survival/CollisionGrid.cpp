@@ -121,7 +121,7 @@ vector<shared_ptr<Object>> CollisionGrid::GetObjects(int xPos, int yPos, int r, 
 					foundObjects.insert(foundObjects.end(), objects[x][y].begin(), objects[x][y].end());
 				else {
 					// Only include objects that match the given type
-					for (auto object : foundObjects)
+					for (auto object : objects[x][y])
 						if (object->GetType() == type)
 							foundObjects.push_back(object);
 				}
@@ -134,7 +134,7 @@ vector<shared_ptr<Object>> CollisionGrid::GetObjects(int xPos, int yPos, int r, 
 vector<shared_ptr<Object>> CollisionGrid::GetObjects(Vector2f pos, int r, string type) {
 	int x = pos.x / cellSize;
 	int y = pos.y / cellSize;
-	return GetObjects(x, y, r);
+	return GetObjects(x, y, r, type);
 }
 
 int CollisionGrid::GetWidth() {
