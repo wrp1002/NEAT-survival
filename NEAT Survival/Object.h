@@ -65,6 +65,7 @@ public:
 	float GetB();
 
 	void SetAlive(bool a);
+	void SetRadius(float radius);
 	void SetX(float x);
 	void SetY(float y);
 };

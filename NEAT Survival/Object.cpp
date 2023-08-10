@@ -151,6 +151,10 @@ void Object::SetAlive(bool a) {
 	alive = a;
 }
 
+void Object::SetRadius(float newRadius) {
+	radius = newRadius;
+}
+
 void Object::SetX(float x) {
 	pos.x = x;
 }

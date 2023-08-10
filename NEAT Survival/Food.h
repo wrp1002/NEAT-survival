@@ -20,17 +20,20 @@ private:
 public:
 	enum FOOD_TYPES { FOOD, WASTE, MEAT };
 
-	inline static double TARGET_RADIUS = 5;
-	inline static double MAX_ENERGY = 15.0;
+	constexpr static int MAX_RADIUS = 50.0;
+	constexpr static double MAX_ENERGY = 100.0;
+	constexpr static double STARTING_ENERGY = 15.0;
 
 	Food(Vector2f startingPos, double energy, int type = FOOD);
 
 	void Update();
 	void Draw();
+	void CollisionEvent(shared_ptr<Object> other);
 
 	void SetEnergy(double newEnergy);
 
 	double GetEnergy();
+	float GetRadiusForEnergy(double energy);
 	bool IsFood();
 	bool IsWaste();
 	bool IsMeat();

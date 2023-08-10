@@ -20,7 +20,7 @@ void Food::ConvertToMeat() {
 	foodType = MEAT;
 }
 
-Food::Food(Vector2f startingPos, double startingEnergy, int newType) : Object(startingPos.x, startingPos.y, TARGET_RADIUS * (startingEnergy / MAX_ENERGY) + 1) {
+Food::Food(Vector2f startingPos, double startingEnergy, int newType) : Object(startingPos.x, startingPos.y, GetRadiusForEnergy(startingEnergy)) {
 	energy = startingEnergy;
 	foodType = newType;
 	life = 1000 + rand() % 500;
@@ -39,7 +39,7 @@ Food::Food(Vector2f startingPos, double startingEnergy, int newType) : Object(st
 	else if (foodType == MEAT)
 		ConvertToMeat();
 
-	//cout << "New food" << pos.x << pos.y << endl;
+	//cout << "New food" << pos.x << pos.y << " " << GetType() << endl;
 }
 
 void Food::Update() {
@@ -54,7 +54,39 @@ void Food::Update() {
 	if (energy <= 0)
 		alive = false;
 
+
+	// Move towards other food to merge
+	if (energy < MAX_ENERGY) {
+		vector<shared_ptr<Object>> nearbyFood = GetNearbyObjects(1, "food");
+		shared_ptr<Object> targetFood = nearbyFood.size() ? nearbyFood[rand() % nearbyFood.size()] : nullptr;
+
+		if (targetFood && targetFood.get() != this) {
+			float dir = GetAngleTo(targetFood);
+			float dist = pos.GetDistance(targetFood->GetPos());
+			float force = dist ? (1.0 / (dist)) : 0;
+			vel += Vector2f(cos(dir) * force, -sin(dir) * force);
+		}
+	}
+
 	Object::Update();
+}
+
+void Food::CollisionEvent(shared_ptr<Object> other) {
+	if (shared_ptr<Food> otherFood = dynamic_pointer_cast<Food>(other)) {
+		if (!otherFood->IsAlive() || !IsAlive())
+			return;
+
+		if (IsWaste() || otherFood->IsWaste())
+			return;
+
+		if (GetEnergy() + otherFood->GetEnergy() > MAX_ENERGY)
+			return;
+
+		SetEnergy(GetEnergy() + otherFood->GetEnergy());
+		otherFood->SetEnergy(0);
+		otherFood->SetAlive(false);
+		SetRadius(GetRadiusForEnergy(energy));
+	}
 }
 
 void Food::Draw() {
@@ -63,6 +95,10 @@ void Food::Draw() {
 
 double Food::GetEnergy() {
 	return energy;
+}
+
+float Food::GetRadiusForEnergy(double energy) {
+	return (energy / MAX_ENERGY) * MAX_RADIUS;
 }
 
 bool Food::IsFood() {
