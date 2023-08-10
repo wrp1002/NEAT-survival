@@ -2,7 +2,9 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_native_dialog.h>
 
+#include <exception>
 #include <iostream>
 
 #include "Globals.h"
@@ -27,16 +29,49 @@ int main() {
 	double lastRedrawTime = 0;
 	float maxRedrawTime = 2.0;
 
+	cout << "Initializing Allegro" << endl;
 	al_init();
 	al_init_primitives_addon();
 	al_init_font_addon();
 	al_init_ttf_addon();
+	al_init_native_dialog_addon();
 	al_install_mouse();
 	al_install_keyboard();
 
-
+	cout << "Creating display" << endl;
+	al_set_new_display_flags(ALLEGRO_GTK_TOPLEVEL);
 	ALLEGRO_DISPLAY* display = al_create_display(Globals::screenWidth, Globals::screenHeight);
 
+
+	ALLEGRO_MENU_INFO menu_info[] = {
+		ALLEGRO_START_OF_MENU("&File", 100),
+			{ "&Open", 101, 0, NULL },
+			ALLEGRO_START_OF_MENU("Open &Recent...", 110),
+				{ "Recent 1", 112, 0, NULL },
+				{ "Recent 2", 113, 0, NULL },
+				ALLEGRO_END_OF_MENU,
+
+			{ "Show Info Display", 104, 0, NULL },
+			{ "E&xit", 105, 0, NULL },
+		ALLEGRO_END_OF_MENU,
+
+		ALLEGRO_START_OF_MENU("&Search", 200),
+			{"Random", 220, 0, NULL },
+			ALLEGRO_START_OF_MENU("Highest", 210),
+				{ "Age", 211, 0, NULL },
+				{ "Energy", 212, 0, NULL },
+			ALLEGRO_END_OF_MENU,
+
+		ALLEGRO_END_OF_MENU,
+		ALLEGRO_END_OF_MENU
+	};
+
+	cout << "Building toolbar" << endl;
+	ALLEGRO_MENU *menu = al_build_menu(menu_info);
+	al_set_display_menu(display, menu);
+
+
+	cout << "Setting up event queue" << endl;
 	ALLEGRO_EVENT_QUEUE* event_queue = al_create_event_queue();
 	ALLEGRO_TIMER* timer = al_create_timer(1.0 / 60.0);
 	InfoDisplay::event_queue = event_queue;
@@ -45,8 +80,9 @@ int main() {
 	al_register_event_source(event_queue, al_get_display_event_source(display));
 	al_register_event_source(event_queue, al_get_mouse_event_source());
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
+	al_register_event_source(event_queue, al_get_default_menu_event_source());
 
-
+	cout << "Starting timer" << endl;
 	al_start_timer(timer);
 
 	while (!done) {
@@ -54,7 +90,12 @@ int main() {
 		al_wait_for_event(event_queue, &ev);
 
 		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-			done = true;
+			if (ev.display.source == display)
+				done = true;
+			else if (InfoDisplay::IsVisible() && InfoDisplay::display == ev.display.source) {
+				InfoDisplay::Hide();
+				al_set_menu_item_caption(menu, 104, "Show Info Display");
+			}
 		}
 		else if (ev.type == ALLEGRO_EVENT_KEY_DOWN) {
 			switch (ev.keyboard.keycode) {
@@ -166,6 +207,23 @@ int main() {
 					UserInput::StopDragging();
 				}
 			}
+		}
+		else if (ev.type == ALLEGRO_EVENT_MENU_CLICK) {
+			switch (ev.user.data1) {
+				case 104:
+					InfoDisplay::Toggle();
+					if (InfoDisplay::IsVisible())
+						al_set_menu_item_caption(menu, ev.user.data1, "Hide Info Display");
+					else
+						al_set_menu_item_caption(menu, ev.user.data1, "Show Info Display");
+
+					break;
+				case 105:
+					done = true;
+					break;
+			}
+
+			cout << ev.user.data1 << endl;
 		}
 		else if (ev.type == ALLEGRO_EVENT_TIMER) {
 			redraw = true;
