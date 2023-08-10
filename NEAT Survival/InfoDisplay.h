@@ -32,5 +32,7 @@ namespace InfoDisplay {
 	string DrawNN(shared_ptr<NEAT> nn);
 
 	Vector2f CalculateNodePos(shared_ptr<Node> node);
+
+	bool IsVisible();
 };
 

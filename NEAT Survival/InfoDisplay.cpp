@@ -243,3 +243,8 @@ Vector2f InfoDisplay::CalculateNodePos(shared_ptr<Node> node) {
 
 	return realPos;
 }
+
+bool InfoDisplay::IsVisible() {
+	return display != nullptr;
+}
+
