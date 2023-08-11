@@ -37,7 +37,7 @@ void CollisionGrid::Draw() {
 		for (unsigned y = 0; y < height; y++) {
 			int drawX = x * cellSize;
 			int drawY = y * cellSize;
-			al_draw_textf(Font::GetFont("Minecraft.ttf", 14), al_map_rgb(255, 255, 255), drawX + cellSize / 2, drawY + cellSize / 2, ALLEGRO_ALIGN_CENTER, "%i", objects[x][y].size());
+			al_draw_textf(Font::GetFont("Minecraft.ttf", 14), al_map_rgb(255, 255, 255), drawX + cellSize / 2, drawY + cellSize / 2, ALLEGRO_ALIGN_CENTER, "%li", objects[x][y].size());
 		}
 	}
 }

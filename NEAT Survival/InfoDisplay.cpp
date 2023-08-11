@@ -2,7 +2,6 @@
 
 #include <fmt/core.h>
 
-#include "Globals.h"
 #include "Object.h"
 #include "Font.h"
 #include "GameManager.h"
@@ -97,7 +96,7 @@ void InfoDisplay::Draw() {
 	}
 
 	for (unsigned i = 0; i < infoText.size(); i++) {
-		int flags = NULL;
+		int flags = 0;
 		int x = 10;
 		int y = (i) / 3 * 17 + 10;
 

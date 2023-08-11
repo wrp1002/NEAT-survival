@@ -8,7 +8,7 @@ ALLEGRO_FONT* Font::GetFont(string fontName, int fontSize) {
 	string key = fontName + to_string(fontSize);
 	if (fonts[key] == nullptr) {
 		string fontPath = Globals::resourcesDir + fontName;
-		fonts[key] = al_load_font(fontPath.c_str(), fontSize, NULL);
+		fonts[key] = al_load_font(fontPath.c_str(), fontSize, 0);
 	}
 	return fonts[key];
 }

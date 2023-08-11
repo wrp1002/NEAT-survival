@@ -90,7 +90,7 @@ void QuadTree::Draw() {
 			child.Draw();
 	}
 	al_draw_rectangle(x, y, x + w, y + h, al_map_rgb(100, 100, 100), 5);
-	al_draw_textf(Font::GetFont("Minecraft.ttf", 14), al_map_rgb(255, 255, 255), x + w / 2, y + h / 2, ALLEGRO_ALIGN_CENTER, "%i", objects.size());
+	al_draw_textf(Font::GetFont("Minecraft.ttf", 14), al_map_rgb(255, 255, 255), x + w / 2, y + h / 2, ALLEGRO_ALIGN_CENTER, "%li", objects.size());
 }
 
 void QuadTree::Clear() {

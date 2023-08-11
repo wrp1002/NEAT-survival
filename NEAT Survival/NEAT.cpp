@@ -3,6 +3,8 @@
 #include "Globals.h"
 #include "Node.h"
 #include "Connection.h"
+#include <fmt/core.h>
+#include <stdexcept>
 
 void NEAT::_RemoveNode(vector<shared_ptr<Node>>* nodes, shared_ptr<Node> nodeToRemove) {
 	for (unsigned int i = 0; i < nodes->size(); i++) {
@@ -136,7 +138,7 @@ vector<double> NEAT::Calculate(vector<double> inputs) {
 
 	if (inputs.size() != inputNodes.size()) {
 		cout << "input nodes:" << inputNodes.size() << " given inputs:" << inputs.size() << endl;
-		throw exception("Input sizes don't match!");
+		throw runtime_error("Input sizes don't match!");
 	}
 
 	for (unsigned i = 0; i < inputs.size(); i++)
