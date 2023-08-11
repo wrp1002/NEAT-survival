@@ -94,6 +94,15 @@ void Mouth::Bite() {
 		double eatAmount = Globals::Constrain((double)parent->GetDamage(), 0.0, agent->GetHealth());
 		agent->SetHealth(agent->GetHealth() - eatAmount);
 		parent->AddEnergy(eatAmount);
+
+		if (agent->GetHealth() <= 0) {
+			double leftoverEnery = agent->GetWaste() + agent->GetEnergy();
+			parent->AddEnergy(leftoverEnery);
+			parent->IncrementKills();
+
+			agent->SetWaste(0.0);
+			agent->SetEnergy(0.0);
+		}
 	}
 
 	cooldownTimer = cooldownTimerStart;
