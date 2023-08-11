@@ -85,7 +85,6 @@ void Food::CollisionEvent(shared_ptr<Object> other) {
 		SetEnergy(GetEnergy() + otherFood->GetEnergy());
 		otherFood->SetEnergy(0);
 		otherFood->SetAlive(false);
-		SetRadius(GetRadiusForEnergy(energy));
 	}
 }
 
@@ -98,7 +97,7 @@ double Food::GetEnergy() {
 }
 
 float Food::GetRadiusForEnergy(double energy) {
-	return (energy / MAX_ENERGY) * MAX_RADIUS;
+	return (energy / MAX_ENERGY) * MAX_RADIUS + MIN_RADIUS;
 }
 
 bool Food::IsFood() {
@@ -117,4 +116,5 @@ void Food::SetEnergy(double newEnergy) {
 	energy = newEnergy;
 	if (energy <= 0)
 		alive = false;
+	SetRadius(GetRadiusForEnergy(energy));
 }

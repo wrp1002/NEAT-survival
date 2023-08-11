@@ -21,6 +21,7 @@ public:
 	enum FOOD_TYPES { FOOD, WASTE, MEAT };
 
 	constexpr static int MAX_RADIUS = 50.0;
+	constexpr static int MIN_RADIUS = 5.0;
 	constexpr static double MAX_ENERGY = 100.0;
 	constexpr static double STARTING_ENERGY = 15.0;
 
