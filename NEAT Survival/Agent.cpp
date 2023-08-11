@@ -7,7 +7,6 @@
 
 
 #include "NEAT.h"
-#include "Eye.h"
 #include "TriangleEye.h"
 #include "Mouth.h"
 
@@ -155,7 +154,11 @@ void Agent::Update() {
 	bool wantsToEat = outputs[7] > 0.5;
 	bool wantsToBoost = outputs[8] > 0.5;
 	eyeSpreadPercent = (outputs[9] + 1.0) / 2;
+	double r = (outputs[10] + 1.0) * 255;
+	double g = (outputs[11] + 1.0) * 255;
+	double b = (outputs[12] + 1.0) * 255;
 
+	SetColor(al_map_rgb((stats.rGene + r) / 2, (stats.gGene + g) / 2, (stats.bGene + b) / 2));
 
 	// handle user input
 	if (userControlled) {
@@ -307,6 +310,7 @@ void Agent::Draw() {
 	mouth->Draw();
 
 	al_draw_filled_circle(pos.x, pos.y, radius, color);
+	al_draw_filled_circle(pos.x, pos.y, radius / 2, stats.color);
 
 	int lineLen = radius*2 + forwardSpeed;
 

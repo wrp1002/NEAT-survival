@@ -72,6 +72,8 @@ void AgentStats::SetGenes(vector<float> newGenes) {
 	// Speed gene: 4
 	speedGene = genes[4];
 	accSpeed = speedGene + 0.5;
+
+	color = al_map_rgb_f(rGene, gGene, bGene);
 }
 
 void AgentStats::Mutate() {
