@@ -77,7 +77,9 @@ void InfoDisplay::Draw() {
 			infoText.insert(infoText.end(), {
 				fmt::format("Generation: {}", selectedAgent->GetGeneration()),
 				fmt::format("Health: {:.2f}%", selectedAgent->GetHealthPercent() * 100),
-				fmt::format("Age: {:.2f}", selectedAgent->GetAge())
+				fmt::format("Age: {:.2f}", selectedAgent->GetAge()),
+				fmt::format("Kills: {}", selectedAgent->GetKills()),
+				fmt::format("Energy Usage: {:.2f}", selectedAgent->GetEnergyUsage()),
 			});
 
 			infoText.insert(infoText.end(), {
