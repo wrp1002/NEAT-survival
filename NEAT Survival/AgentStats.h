@@ -26,10 +26,13 @@ public:
 	double maxSpeed;
 	double damage;
 	double healAmount;
+	double prevEnergyUsage;
 
 	float size;
 	float accSpeed;
 	float age, maxAge;
+	float sinTimer;
+	int kills;
 
 	ALLEGRO_COLOR color;
 

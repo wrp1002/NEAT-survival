@@ -199,7 +199,8 @@ void Agent::Update() {
 	healing = false;
 	if (wantsToHeal && stats.energy > stats.healAmount) {
 		healing = true;
-		stats.health += stats.healAmount;
+		stats.health += stats.healAmount / 2.0;
+		stats.waste += stats.healAmount / 2.0;
 		stats.energy -= stats.healAmount;
 		if (stats.health > stats.maxHealth) {
 			double diff = stats.health - stats.maxHealth;
@@ -214,8 +215,8 @@ void Agent::Update() {
 		wantToReproduce = false;
 	}
 
-	energyUsage += abs(outputs[0]) * 0.005 * stats.sizeGene * (1.0 + wantsToBoost * 5.0);
-	energyUsage += abs(outputs[1]) * 0.005 * stats.sizeGene;
+	energyUsage += abs(forwardSpeed) * 0.005 * stats.sizeGene * (1.0 + wantsToBoost * 5.0);
+	energyUsage += abs(rotationSpeed) * 0.005 * stats.sizeGene;
 
 
 	// energy usage
@@ -227,6 +228,8 @@ void Agent::Update() {
 		stats.health -= 0.1;
 		stats.waste += 0.1;
 	}
+
+	stats.prevEnergyUsage = energyUsage;
 
 	// movement
 	dir += rotationSpeed;
@@ -429,6 +432,10 @@ void Agent::SetEnergy(double newEnergy) {
 	stats.energy = newEnergy;
 }
 
+void Agent::SetWaste(double newWaste) {
+	stats.waste = newWaste;
+}
+
 void Agent::SetGeneration(int newGeneration) {
 	generation = newGeneration;
 }
@@ -454,12 +461,24 @@ void Agent::HealthToWaste(double amount) {
 	stats.HealthToWaste(amount);
 }
 
+void Agent::IncrementKills() {
+	stats.kills++;
+}
+
 int Agent::GetGeneration() {
 	return generation;
 }
 
+int Agent::GetKills() {
+	return stats.kills;
+}
+
 double Agent::GetEnergy() {
 	return stats.energy;
+}
+
+double Agent::GetEnergyUsage() {
+	return stats.prevEnergyUsage;
 }
 
 double Agent::GetWaste() {

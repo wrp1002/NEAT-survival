@@ -71,18 +71,22 @@ public:
 
 	void SetUserControlled(bool user) { this->userControlled = user; }
 	void SetEnergy(double newEnergy);
+	void SetWaste(double newWaste);
 	void SetGeneration(int newGeneration);
 	void AddEnergy(double amount);
 	void SetHealth(double newHealth);
 	void AddWaste(double amount);
 	void HealthToWaste(double amount);
+	void IncrementKills();
 
 	float GetX();
 	float GetY();
 	shared_ptr<NEAT> GetNN();
 	int GetGeneration();
+	int GetKills();
 
 	double GetEnergy();
+	double GetEnergyUsage();
 	double GetWaste();
 	double GetHealth();
 	float GetEnergyPercent();

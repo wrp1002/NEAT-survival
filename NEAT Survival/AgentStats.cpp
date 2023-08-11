@@ -24,6 +24,8 @@ AgentStats::AgentStats() {
 	size = 0;
 
 	age = 0;
+	kills = 0;
+	prevEnergyUsage = 0;
 	maxAge = 60.0 * 5;
 	color = al_map_rgb_f(rGene, gGene, bGene);
 }
@@ -48,6 +50,7 @@ void AgentStats::SetGenes(vector<float> newGenes) {
 	maxSpeed = 0;
 	damage = 15;
 	healAmount = 0.1;
+	sinTimer = 0;
 
 	age = 0;
 	maxAge = 60.0 * 5;
