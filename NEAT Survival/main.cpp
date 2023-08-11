@@ -58,11 +58,16 @@ int main() {
 		ALLEGRO_START_OF_MENU("&Search", 200),
 			{"Random", 220, 0, NULL },
 			ALLEGRO_START_OF_MENU("Highest", 210),
+				{ "Kills", 213, 0, NULL },
 				{ "Age", 211, 0, NULL },
 				{ "Energy", 212, 0, NULL },
 			ALLEGRO_END_OF_MENU,
-
 		ALLEGRO_END_OF_MENU,
+
+		ALLEGRO_START_OF_MENU("&Rules", 300),
+			{"Follow Random Agent", 301, 0, NULL },
+		ALLEGRO_END_OF_MENU,
+
 		ALLEGRO_END_OF_MENU
 	};
 
@@ -220,6 +225,21 @@ int main() {
 					break;
 				case 105:
 					done = true;
+					break;
+				case 213:
+					shared_ptr<Agent> selectedAgent = nullptr;
+					int highestKills = 0;
+
+					for (auto agent : GameManager::agents) {
+						int kills = agent->GetKills();
+						if (kills > highestKills) {
+							selectedAgent = agent;
+							highestKills = kills;
+						}
+					}
+					InfoDisplay::SelectObject(selectedAgent);
+					Camera::FollowObject(selectedAgent);
+
 					break;
 			}
 
