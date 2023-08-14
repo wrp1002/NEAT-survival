@@ -16,12 +16,18 @@ namespace Toolbar {
         enum IDS {
             EXIT,
             TOGGLE_INFO_DISPLAY,
+
             SEARCH_RANDOM,
-            SEARCH_KILLS,
-            SEARCH_DAMAGED_INPUTS,
-            SEARCH_AGE,
-            SEARCH_ENERGY,
-            SEARCH_HEALTH,
+            SEARCH_HIGHEST_KILLS,
+            SEARCH_HIGHEST_DAMAGED_INPUTS,
+            SEARCH_HIGHEST_AGE,
+            SEARCH_HIGHEST_ENERGY,
+            SEARCH_HIGHEST_HEALTH,
+            SEARCH_LOWEST_KILLS,
+            SEARCH_LOWEST_DAMAGED_INPUTS,
+            SEARCH_LOWEST_AGE,
+            SEARCH_LOWEST_ENERGY,
+            SEARCH_LOWEST_HEALTH,
 
             SPEED_INCREASE,
             SPEED_DECREASE,

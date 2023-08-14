@@ -28,11 +28,18 @@ void Toolbar::Init(ALLEGRO_DISPLAY *display) {
 		ALLEGRO_START_OF_MENU("&Search", 200),
 			{"Random", BUTTON_IDS::SEARCH_RANDOM, 0, NULL },
 			ALLEGRO_START_OF_MENU("Highest", 210),
-				{ "Kills", BUTTON_IDS::SEARCH_KILLS, 0, NULL },
-				{ "Damaged Inputs", BUTTON_IDS::SEARCH_DAMAGED_INPUTS, 0, NULL },
-				{ "Age", BUTTON_IDS::SEARCH_AGE, 0, NULL },
-				{ "Energy", BUTTON_IDS::SEARCH_ENERGY, 0, NULL },
-				{ "Health", BUTTON_IDS::SEARCH_HEALTH, 0, NULL },
+				{ "Age", BUTTON_IDS::SEARCH_HIGHEST_AGE, 0, NULL },
+				{ "Damaged Inputs", BUTTON_IDS::SEARCH_HIGHEST_DAMAGED_INPUTS, 0, NULL },
+				{ "Energy", BUTTON_IDS::SEARCH_HIGHEST_ENERGY, 0, NULL },
+				{ "Health", BUTTON_IDS::SEARCH_HIGHEST_HEALTH, 0, NULL },
+				{ "Kills", BUTTON_IDS::SEARCH_HIGHEST_KILLS, 0, NULL },
+			ALLEGRO_END_OF_MENU,
+            ALLEGRO_START_OF_MENU("Lowest", 220),
+				{ "Age", BUTTON_IDS::SEARCH_LOWEST_AGE, 0, NULL },
+				{ "Damaged Inputs", BUTTON_IDS::SEARCH_LOWEST_DAMAGED_INPUTS, 0, NULL },
+				{ "Energy", BUTTON_IDS::SEARCH_LOWEST_ENERGY, 0, NULL },
+				{ "Health", BUTTON_IDS::SEARCH_LOWEST_HEALTH, 0, NULL },
+				{ "Kills", BUTTON_IDS::SEARCH_LOWEST_KILLS, 0, NULL },
 			ALLEGRO_END_OF_MENU,
 		ALLEGRO_END_OF_MENU,
 
@@ -84,24 +91,44 @@ void Toolbar::HandleEvent(ALLEGRO_EVENT ev) {
             Camera::FollowObject(selectedAgent);
             break;
         }
-        case BUTTON_IDS::SEARCH_KILLS: {
+        case BUTTON_IDS::SEARCH_HIGHEST_KILLS: {
             AgentSearch<int>(true, &Agent::GetKills);
             break;
         }
-        case BUTTON_IDS::SEARCH_DAMAGED_INPUTS: {
+        case BUTTON_IDS::SEARCH_HIGHEST_DAMAGED_INPUTS: {
             AgentSearch<int>(true, &Agent::GetDamagedInputsCount);
             break;
         }
-        case BUTTON_IDS::SEARCH_AGE: {
+        case BUTTON_IDS::SEARCH_HIGHEST_AGE: {
             AgentSearch<float>(true, &Agent::GetAge);
             break;
         }
-        case BUTTON_IDS::SEARCH_ENERGY: {
+        case BUTTON_IDS::SEARCH_HIGHEST_ENERGY: {
             AgentSearch<double>(true, &Agent::GetEnergy);
             break;
         }
-        case BUTTON_IDS::SEARCH_HEALTH: {
+        case BUTTON_IDS::SEARCH_HIGHEST_HEALTH: {
             AgentSearch<double>(true, &Agent::GetHealth);
+            break;
+        }
+        case BUTTON_IDS::SEARCH_LOWEST_KILLS: {
+            AgentSearch<int>(false, &Agent::GetKills);
+            break;
+        }
+        case BUTTON_IDS::SEARCH_LOWEST_DAMAGED_INPUTS: {
+            AgentSearch<int>(false, &Agent::GetDamagedInputsCount);
+            break;
+        }
+        case BUTTON_IDS::SEARCH_LOWEST_AGE: {
+            AgentSearch<float>(false, &Agent::GetAge);
+            break;
+        }
+        case BUTTON_IDS::SEARCH_LOWEST_ENERGY: {
+            AgentSearch<double>(false, &Agent::GetEnergy);
+            break;
+        }
+        case BUTTON_IDS::SEARCH_LOWEST_HEALTH: {
+            AgentSearch<double>(false, &Agent::GetHealth);
             break;
         }
     }
