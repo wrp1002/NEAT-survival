@@ -327,6 +327,31 @@ void Agent::Draw() {
 	al_draw_line(pos.x, pos.y, pos.x + cos(bitObjDir) * 20, pos.y - sin(bitObjDir) * 20, al_map_rgb(255, 0, 0), 2);
 	al_draw_line(pos.x, pos.y, pos.x + cos(bitObjDeltaDir) * 20, pos.y - sin(bitObjDeltaDir) * 20, al_map_rgb(255, 0, 255), 2);
 
+	DrawHealthBar();
+	DrawEnergyBar();
+}
+
+void Agent::DrawHealthBar() {
+	int length = 40;
+	int width = 3;
+	int yOff = 30;
+
+	Vector2f start(pos.x - length / 2, pos.y - yOff);
+
+	al_draw_filled_rectangle(start.x, start.y, start.x + length, start.y + width, al_map_rgb(255, 0, 0));
+	al_draw_filled_rectangle(start.x, start.y, start.x + length * GetHealthPercent(), start.y + width, al_map_rgb(0, 255, 0));
+}
+
+void Agent::DrawEnergyBar() {
+	int length = 40;
+	int width = 3;
+	int yOff = 25;
+
+	Vector2f start(pos.x - length / 2, pos.y - yOff);
+
+	al_draw_filled_rectangle(start.x, start.y, start.x + length, start.y + width, al_map_rgb(255, 0, 0));
+	al_draw_filled_rectangle(start.x, start.y, start.x + length * GetEnergyPercent(), start.y + width, al_map_rgb(50, 158, 168));
+
 }
 
 void Agent::CollisionEvent(shared_ptr<Object> other) {
