@@ -65,7 +65,7 @@ void Toolbar::Init(ALLEGRO_DISPLAY *display) {
 
 void Toolbar::HandleEvent(ALLEGRO_EVENT ev) {
     switch (ev.user.data1) {
-        case BUTTON_IDS::TOGGLE_INFO_DISPLAY:
+        case BUTTON_IDS::TOGGLE_INFO_DISPLAY: {
             InfoDisplay::Toggle();
             if (InfoDisplay::IsVisible())
                 al_set_menu_item_caption(menu, ev.user.data1, "Hide Info Display");
@@ -73,25 +73,19 @@ void Toolbar::HandleEvent(ALLEGRO_EVENT ev) {
                 al_set_menu_item_caption(menu, ev.user.data1, "Show Info Display");
 
             break;
-
-        case BUTTON_IDS::EXIT:
+        }
+        case BUTTON_IDS::EXIT: {
             //done = true;
             break;
-
-        case BUTTON_IDS::SEARCH_KILLS: {
-            shared_ptr<Agent> selectedAgent = nullptr;
-            int highestKills = 0;
-
-            for (auto agent : GameManager::agents) {
-                int kills = agent->GetKills();
-                if (kills > highestKills) {
-                    selectedAgent = agent;
-                    highestKills = kills;
-                }
-            }
+        }
+        case BUTTON_IDS::SEARCH_RANDOM: {
+            shared_ptr<Agent> selectedAgent = GameManager::GetRandomAgent();
             InfoDisplay::SelectObject(selectedAgent);
             Camera::FollowObject(selectedAgent);
-
+            break;
+        }
+        case BUTTON_IDS::SEARCH_KILLS: {
+            AgentSearch<int>(true, &Agent::GetKills);
             break;
         }
         case BUTTON_IDS::SEARCH_DAMAGED_INPUTS: {

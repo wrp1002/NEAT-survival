@@ -379,6 +379,9 @@ string GameManager::GetSimTicksStr() {
 }
 
 shared_ptr<Agent> GameManager::GetRandomAgent() {
+	if (agents.size() == 0)
+		return nullptr;
+
 	return agents[rand() % agents.size()];
 }
 

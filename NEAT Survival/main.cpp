@@ -185,7 +185,6 @@ int main() {
 		}
 		else if (ev.type == ALLEGRO_EVENT_MENU_CLICK) {
 			Toolbar::HandleEvent(ev);
-			cout << ev.user.data1 << endl;
 		}
 		else if (ev.type == ALLEGRO_EVENT_TIMER) {
 			redraw = true;
