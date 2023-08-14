@@ -29,6 +29,7 @@ void Object::Draw() {
 
 void Object::Update() {
 	prevPos = pos;
+	vel += acc;
 	pos += vel;
 	vel *= dragCoef;
 

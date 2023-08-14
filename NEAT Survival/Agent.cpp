@@ -154,7 +154,7 @@ void Agent::Update() {
 
 	// extract output from NN
 	forwardSpeed = outputs[0] * stats.accSpeed;
-	rotationSpeed = ( (outputs[1] + 1.0) / 2 - (outputs[2] + 1.0) / 2 ) / 2 * maxRotationSpeed;
+	rotationSpeed = outputs[1] * maxRotationSpeed;
 	bool wantToReproduce = outputs[3] > 0.5 || stats.energy > 0.80;
 	bool wantsToHeal = outputs[4] > 0.5;
 	double mem1 = outputs[5];
@@ -537,12 +537,20 @@ double Agent::GetHealth() {
 	return stats.health;
 }
 
+double Agent::GetMaxHealth() {
+	return stats.maxHealth;
+}
+
 float Agent::GetEnergyPercent() {
 	return stats.energy / stats.maxEnergy;
 }
 
 float Agent::GetAge() {
 	return stats.age;
+}
+
+float Agent::GetMaxAge() {
+	return stats.maxAge;
 }
 
 float Agent::GetDamage() {

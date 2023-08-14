@@ -10,6 +10,7 @@ AgentStats::AgentStats() {
 	speedGene = 0;
 	sizeGene = 0;
 	dietGene = 0;
+	sinTimer = 0;
 
 	health = 0;
 	maxHealth = 0;
