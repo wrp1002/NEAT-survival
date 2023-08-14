@@ -1,5 +1,6 @@
 #include "InfoDisplay.h"
 
+#include <allegro5/allegro_primitives.h>
 #include <fmt/core.h>
 
 #include "Object.h"
@@ -76,8 +77,8 @@ void InfoDisplay::Draw() {
 		if (shared_ptr<Agent> selectedAgent = dynamic_pointer_cast<Agent>(object)) {
 			infoText.insert(infoText.end(), {
 				fmt::format("Generation: {}", selectedAgent->GetGeneration()),
-				fmt::format("Health: {:.2f}%", selectedAgent->GetHealthPercent() * 100),
-				fmt::format("Age: {:.2f}", selectedAgent->GetAge()),
+				fmt::format("Health: {:.2f}/{}", selectedAgent->GetHealth(), int(selectedAgent->GetMaxHealth())),
+				fmt::format("Age: {}/{}", int(selectedAgent->GetAge()), int(selectedAgent->GetMaxAge())),
 				fmt::format("Kills: {}", selectedAgent->GetKills()),
 				fmt::format("Energy Usage: {:.2f}", selectedAgent->GetEnergyUsage()),
 			});
@@ -215,6 +216,16 @@ string InfoDisplay::DrawNN(shared_ptr<NEAT> nn) {
 
 	DrawNodes(nn->GetNodes(), hoveredNode, firstDrawAlpha, false);
 	DrawNodes(nodes, hoveredNode, 1, true);
+
+	shared_ptr<Agent> selectedAgent = dynamic_pointer_cast<Agent>(selectedObject.lock());
+
+	for (unsigned i = 0; i < nn->GetInputNodes().size(); i++) {
+		if (selectedAgent->InputNodeDisabled(i)) {
+			shared_ptr<Node> node = nn->GetInputNodes()[i];
+			Vector2f pos = CalculateNodePos(node);
+			al_draw_filled_circle(pos.x, pos.y, 10, al_map_rgb(255, 0, 255));
+		}
+	}
 
 	return selectedNodeName;
 }

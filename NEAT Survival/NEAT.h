@@ -41,6 +41,7 @@ public:
 	~NEAT();
 
 	shared_ptr<NEAT> Copy();
+	vector<shared_ptr<Node>> GetInputNodes();
 	vector<shared_ptr<Node>> GetNodes();
 	vector<shared_ptr<Connection>> GetConnections();
 	void PrintNN();

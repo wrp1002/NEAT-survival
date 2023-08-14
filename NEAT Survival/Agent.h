@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <memory>
+#include <set>
 
 class NEAT;
 class Eye;
@@ -32,6 +33,7 @@ private:
 	//vector<shared_ptr<Eye>> eyes;
 	vector<shared_ptr<TriangleEye>> eyes;
 	shared_ptr<Mouth> mouth;
+	set<int> damagedInputs;
 	float eyeSpreadPercent, eyeSpreadMax;
 	float viewDistance;
 
@@ -56,8 +58,12 @@ public:
 	void Init();
 	void Update();
 	void Draw();
+	void DrawHealthBar();
+	void DrawEnergyBar();
 	void CollisionEvent(shared_ptr<Object> other);
 	void Reproduce();
+	void DamageRandomNeuron();
+	void RepairRandomNeuron();
 
 	void SetGenes(vector<float> newGenes);
 	void MutateGenes();
@@ -84,16 +90,20 @@ public:
 	shared_ptr<NEAT> GetNN();
 	int GetGeneration();
 	int GetKills();
+	int GetDamagedInputsCount();
 
 	double GetEnergy();
 	double GetEnergyUsage();
 	double GetWaste();
 	double GetHealth();
+	double GetMaxHealth();
 	float GetEnergyPercent();
 	float GetHealthPercent();
 	float GetAge();
+	float GetMaxAge();
 	float GetDamage();
 	bool ShouldReproduce();
+	bool InputNodeDisabled(int index);
 	AgentStats GetAgentStats();
 	shared_ptr<NEAT> CopyNN();
 

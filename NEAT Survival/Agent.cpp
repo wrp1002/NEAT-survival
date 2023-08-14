@@ -9,6 +9,8 @@
 #include "NEAT.h"
 #include "TriangleEye.h"
 #include "Mouth.h"
+#include "Vector2f.h"
+#include <allegro5/allegro_primitives.h>
 
 
 void Agent::Init() {
@@ -141,6 +143,12 @@ void Agent::Update() {
 		inputs.push_back(eye->GetAvgG());
 		inputs.push_back(eye->GetAvgB());
 	}
+
+	// Set damaged neurons to 0
+	for (int i : damagedInputs) {
+		inputs[i] = 0;
+	}
+
 	vector<double> outputs = nn->Calculate(inputs);
 
 
@@ -382,6 +390,17 @@ void Agent::Reproduce() {
 	stats.energy /= 2;
 }
 
+void Agent::DamageRandomNeuron() {
+	damagedInputs.insert(rand() % nn->GetInputNodes().size());
+}
+
+void Agent::RepairRandomNeuron() {
+	if (!damagedInputs.size())
+		return;
+
+	damagedInputs.erase(rand() % nn->GetInputNodes().size());
+}
+
 void Agent::SetGenes(vector<float> newGenes) {
 	stats.SetGenes(newGenes);
 	SetColor(al_map_rgb_f(stats.rGene, stats.gGene, stats.bGene));
@@ -498,6 +517,10 @@ int Agent::GetKills() {
 	return stats.kills;
 }
 
+int Agent::GetDamagedInputsCount() {
+	return damagedInputs.size();
+}
+
 double Agent::GetEnergy() {
 	return stats.energy;
 }
@@ -528,6 +551,10 @@ float Agent::GetDamage() {
 
 bool Agent::ShouldReproduce() {
 	return shouldReproduce;
+}
+
+bool Agent::InputNodeDisabled(int index) {
+	return damagedInputs.count(index);
 }
 
 AgentStats Agent::GetAgentStats() {

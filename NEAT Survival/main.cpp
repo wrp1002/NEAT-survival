@@ -59,8 +59,10 @@ int main() {
 			{"Random", 220, 0, NULL },
 			ALLEGRO_START_OF_MENU("Highest", 210),
 				{ "Kills", 213, 0, NULL },
+				{ "Damaged Inputs", 214, 0, NULL },
 				{ "Age", 211, 0, NULL },
 				{ "Energy", 212, 0, NULL },
+				{ "Health", 215, 0, NULL },
 			ALLEGRO_END_OF_MENU,
 		ALLEGRO_END_OF_MENU,
 
@@ -226,7 +228,7 @@ int main() {
 				case 105:
 					done = true;
 					break;
-				case 213:
+				case 213: {
 					shared_ptr<Agent> selectedAgent = nullptr;
 					int highestKills = 0;
 
@@ -241,6 +243,71 @@ int main() {
 					Camera::FollowObject(selectedAgent);
 
 					break;
+				}
+				case 214: {
+					shared_ptr<Agent> selectedAgent = nullptr;
+					int highestCount = 0;
+
+					for (auto agent : GameManager::agents) {
+						int count = agent->GetDamagedInputsCount();
+						if (count > highestCount) {
+							selectedAgent = agent;
+							highestCount = count;
+						}
+					}
+					InfoDisplay::SelectObject(selectedAgent);
+					Camera::FollowObject(selectedAgent);
+
+					break;
+				}
+				case 211: {
+					shared_ptr<Agent> selectedAgent = nullptr;
+					int highestCount = 0;
+
+					for (auto agent : GameManager::agents) {
+						int count = agent->GetAge();
+						if (count > highestCount) {
+							selectedAgent = agent;
+							highestCount = count;
+						}
+					}
+					InfoDisplay::SelectObject(selectedAgent);
+					Camera::FollowObject(selectedAgent);
+
+					break;
+				}
+				case 212: {
+					shared_ptr<Agent> selectedAgent = nullptr;
+					int highestCount = 0;
+
+					for (auto agent : GameManager::agents) {
+						int count = agent->GetEnergy();
+						if (count > highestCount) {
+							selectedAgent = agent;
+							highestCount = count;
+						}
+					}
+					InfoDisplay::SelectObject(selectedAgent);
+					Camera::FollowObject(selectedAgent);
+
+					break;
+				}
+				case 215: {
+					shared_ptr<Agent> selectedAgent = nullptr;
+					int highestCount = 0;
+
+					for (auto agent : GameManager::agents) {
+						int count = agent->GetHealthPercent();
+						if (count > highestCount) {
+							selectedAgent = agent;
+							highestCount = count;
+						}
+					}
+					InfoDisplay::SelectObject(selectedAgent);
+					Camera::FollowObject(selectedAgent);
+
+					break;
+				}
 			}
 
 			cout << ev.user.data1 << endl;

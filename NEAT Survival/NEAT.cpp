@@ -110,6 +110,10 @@ vector<shared_ptr<Node>> NEAT::GetNodes() {
 	return allNodes;
 }
 
+vector<shared_ptr<Node>> NEAT::GetInputNodes() {
+	return inputNodes;
+}
+
 vector<shared_ptr<Connection>> NEAT::GetConnections() {
 	return connections;
 }
