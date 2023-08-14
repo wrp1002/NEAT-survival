@@ -3,7 +3,7 @@
 Artificial life simulation that uses a simplified realtime NEAT algorithm.
 
 ## Getting Started
-Windows executables are included in the release section. Otherwise you must compile it.
+Some Windows & Linux executables are included in the release section. Otherwise you must compile it
 
 ## Built With
 
