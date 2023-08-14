@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "Globals.h"
+#include "Toolbar.h"
 #include "UserInput.h"
 #include "Agent.h"
 #include "GameManager.h"
@@ -42,41 +43,8 @@ int main() {
 	al_set_new_display_flags(ALLEGRO_GTK_TOPLEVEL);
 	ALLEGRO_DISPLAY* display = al_create_display(Globals::screenWidth, Globals::screenHeight);
 
-
-	ALLEGRO_MENU_INFO menu_info[] = {
-		ALLEGRO_START_OF_MENU("&File", 100),
-			{ "&Open", 101, 0, NULL },
-			ALLEGRO_START_OF_MENU("Open &Recent...", 110),
-				{ "Recent 1", 112, 0, NULL },
-				{ "Recent 2", 113, 0, NULL },
-				ALLEGRO_END_OF_MENU,
-
-			{ "Show Info Display", 104, 0, NULL },
-			{ "E&xit", 105, 0, NULL },
-		ALLEGRO_END_OF_MENU,
-
-		ALLEGRO_START_OF_MENU("&Search", 200),
-			{"Random", 220, 0, NULL },
-			ALLEGRO_START_OF_MENU("Highest", 210),
-				{ "Kills", 213, 0, NULL },
-				{ "Damaged Inputs", 214, 0, NULL },
-				{ "Age", 211, 0, NULL },
-				{ "Energy", 212, 0, NULL },
-				{ "Health", 215, 0, NULL },
-			ALLEGRO_END_OF_MENU,
-		ALLEGRO_END_OF_MENU,
-
-		ALLEGRO_START_OF_MENU("&Rules", 300),
-			{"Follow Random Agent", 301, 0, NULL },
-		ALLEGRO_END_OF_MENU,
-
-		ALLEGRO_END_OF_MENU
-	};
-
 	cout << "Building toolbar" << endl;
-	ALLEGRO_MENU *menu = al_build_menu(menu_info);
-	al_set_display_menu(display, menu);
-
+	Toolbar::Init(display);
 
 	cout << "Setting up event queue" << endl;
 	ALLEGRO_EVENT_QUEUE* event_queue = al_create_event_queue();
@@ -101,7 +69,7 @@ int main() {
 				done = true;
 			else if (InfoDisplay::IsVisible() && InfoDisplay::display == ev.display.source) {
 				InfoDisplay::Hide();
-				al_set_menu_item_caption(menu, 104, "Show Info Display");
+				Toolbar::SetMenuCaption(Toolbar::BUTTON_IDS::TOGGLE_INFO_DISPLAY, "Show Info Display");
 			}
 		}
 		else if (ev.type == ALLEGRO_EVENT_KEY_DOWN) {
@@ -216,100 +184,7 @@ int main() {
 			}
 		}
 		else if (ev.type == ALLEGRO_EVENT_MENU_CLICK) {
-			switch (ev.user.data1) {
-				case 104:
-					InfoDisplay::Toggle();
-					if (InfoDisplay::IsVisible())
-						al_set_menu_item_caption(menu, ev.user.data1, "Hide Info Display");
-					else
-						al_set_menu_item_caption(menu, ev.user.data1, "Show Info Display");
-
-					break;
-				case 105:
-					done = true;
-					break;
-				case 213: {
-					shared_ptr<Agent> selectedAgent = nullptr;
-					int highestKills = 0;
-
-					for (auto agent : GameManager::agents) {
-						int kills = agent->GetKills();
-						if (kills > highestKills) {
-							selectedAgent = agent;
-							highestKills = kills;
-						}
-					}
-					InfoDisplay::SelectObject(selectedAgent);
-					Camera::FollowObject(selectedAgent);
-
-					break;
-				}
-				case 214: {
-					shared_ptr<Agent> selectedAgent = nullptr;
-					int highestCount = 0;
-
-					for (auto agent : GameManager::agents) {
-						int count = agent->GetDamagedInputsCount();
-						if (count > highestCount) {
-							selectedAgent = agent;
-							highestCount = count;
-						}
-					}
-					InfoDisplay::SelectObject(selectedAgent);
-					Camera::FollowObject(selectedAgent);
-
-					break;
-				}
-				case 211: {
-					shared_ptr<Agent> selectedAgent = nullptr;
-					int highestCount = 0;
-
-					for (auto agent : GameManager::agents) {
-						int count = agent->GetAge();
-						if (count > highestCount) {
-							selectedAgent = agent;
-							highestCount = count;
-						}
-					}
-					InfoDisplay::SelectObject(selectedAgent);
-					Camera::FollowObject(selectedAgent);
-
-					break;
-				}
-				case 212: {
-					shared_ptr<Agent> selectedAgent = nullptr;
-					int highestCount = 0;
-
-					for (auto agent : GameManager::agents) {
-						int count = agent->GetEnergy();
-						if (count > highestCount) {
-							selectedAgent = agent;
-							highestCount = count;
-						}
-					}
-					InfoDisplay::SelectObject(selectedAgent);
-					Camera::FollowObject(selectedAgent);
-
-					break;
-				}
-				case 215: {
-					shared_ptr<Agent> selectedAgent = nullptr;
-					int highestCount = 0;
-
-					for (auto agent : GameManager::agents) {
-						int count = agent->GetHealthPercent();
-						if (count > highestCount) {
-							selectedAgent = agent;
-							highestCount = count;
-						}
-					}
-					InfoDisplay::SelectObject(selectedAgent);
-					Camera::FollowObject(selectedAgent);
-
-					break;
-				}
-			}
-
+			Toolbar::HandleEvent(ev);
 			cout << ev.user.data1 << endl;
 		}
 		else if (ev.type == ALLEGRO_EVENT_TIMER) {
