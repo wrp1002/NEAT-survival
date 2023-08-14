@@ -225,6 +225,7 @@ void Agent::Update() {
 
 	energyUsage += abs(forwardSpeed) * 0.005 * stats.sizeGene * (1.0 + wantsToBoost * 5.0);
 	energyUsage += abs(rotationSpeed) * 0.005 * stats.sizeGene;
+	energyUsage += wantsToEat * 0.01;
 
 
 	// energy usage
