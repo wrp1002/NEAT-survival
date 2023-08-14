@@ -9,7 +9,7 @@
 class NEAT;
 class Vector2f;
 
-using std::cout, std::endl;
+using namespace std;
 
 class Egg : public Object {
 private:

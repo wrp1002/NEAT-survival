@@ -208,8 +208,8 @@ void Agent::Update() {
 	if (wantsToHeal && stats.energy > stats.healAmount) {
 		healing = true;
 		stats.health += stats.healAmount / 2.0;
-		stats.waste += stats.healAmount / 2.0;
-		stats.energy -= stats.healAmount;
+		stats.waste -= stats.healAmount / 2.0; // waste calculated later
+		energyUsage += stats.healAmount;
 		if (stats.health > stats.maxHealth) {
 			double diff = stats.health - stats.maxHealth;
 			stats.health -= diff;

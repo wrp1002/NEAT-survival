@@ -92,8 +92,8 @@ void InfoDisplay::Draw() {
 		if (shared_ptr<Egg> selectedEgg = dynamic_pointer_cast<Egg>(object)) {
 			infoText.insert(infoText.end(), {
 				fmt::format("Generation: {}", selectedEgg->GetGeneration()),
+				fmt::format("Health: {:.2f}", selectedEgg->GetHealth()),
 				fmt::format("Hatch Timer: {}", selectedEgg->GetHatchTimer()),
-				fmt::format("Health: {:.2f}", selectedEgg->GetHealth())
 			});
 		}
 	}
