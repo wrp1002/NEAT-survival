@@ -125,14 +125,17 @@ int main() {
 
 				case ALLEGRO_KEY_PGDN:
 					GameManager::DecreaseSpeed();
+					Toolbar::UpdateSpeedDisplay();
 					break;
 
 				case ALLEGRO_KEY_PGUP:
 					GameManager::IncreaseSpeed();
+					Toolbar::UpdateSpeedDisplay();
 					break;
 
 				case ALLEGRO_KEY_HOME:
 					GameManager::ResetSpeed();
+					Toolbar::UpdateSpeedDisplay();
 					break;
 
 				case ALLEGRO_KEY_ENTER:

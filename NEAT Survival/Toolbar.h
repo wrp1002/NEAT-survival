@@ -29,6 +29,7 @@ namespace Toolbar {
             SEARCH_LOWEST_ENERGY,
             SEARCH_LOWEST_HEALTH,
 
+            SPEED_DISPLAY,
             SPEED_INCREASE,
             SPEED_DECREASE,
             SPEED_RESET,
@@ -40,6 +41,7 @@ namespace Toolbar {
     void Init(ALLEGRO_DISPLAY *display);
     void HandleEvent(ALLEGRO_EVENT ev);
     void SetMenuCaption(int id, string text);
+    void UpdateSpeedDisplay();
 
     template <class searchType>
     void AgentSearch(bool highest, searchType(Agent::*funcPtr)(void));

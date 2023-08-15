@@ -2,6 +2,7 @@
 
 #include <allegro5/allegro_native_dialog.h>
 #include <iostream>
+#include <fmt/core.h>
 
 #include "Camera.h"
 #include "InfoDisplay.h"
@@ -49,7 +50,7 @@ void Toolbar::Init(ALLEGRO_DISPLAY *display) {
 
 		ALLEGRO_START_OF_MENU("Sim Speed", 400),
 			{"Increase", BUTTON_IDS::SPEED_INCREASE, 0, NULL },
-			{"Current: 1x", 302, 0, NULL },
+			{"Current: 1x", BUTTON_IDS::SPEED_DISPLAY, 0, NULL },
 			{"Decrease", BUTTON_IDS::SPEED_DECREASE, 0, NULL },
 			{"Reset", BUTTON_IDS::SPEED_RESET, 0, NULL },
 			{"Enable Auto Increase", 305, 0, NULL },
@@ -85,6 +86,23 @@ void Toolbar::HandleEvent(ALLEGRO_EVENT ev) {
             //done = true;
             break;
         }
+        case BUTTON_IDS::SPEED_DECREASE: {
+            GameManager::DecreaseSpeed();
+            UpdateSpeedDisplay();
+            break;
+        }
+        case BUTTON_IDS::SPEED_INCREASE: {
+            GameManager::IncreaseSpeed();
+            UpdateSpeedDisplay();
+            break;
+        }
+        case BUTTON_IDS::SPEED_RESET: {
+            GameManager::ResetSpeed();
+            UpdateSpeedDisplay();
+            break;
+        }
+
+
         case BUTTON_IDS::SEARCH_RANDOM: {
             shared_ptr<Agent> selectedAgent = GameManager::GetRandomAgent();
             InfoDisplay::SelectObject(selectedAgent);
@@ -137,6 +155,10 @@ void Toolbar::HandleEvent(ALLEGRO_EVENT ev) {
 void Toolbar::SetMenuCaption(int id, string text) {
     cout << "Setting" << id << " to " << text << endl;
     al_set_menu_item_caption(menu, id, text.c_str());
+}
+
+void Toolbar::UpdateSpeedDisplay() {
+    SetMenuCaption(BUTTON_IDS::SPEED_DISPLAY, fmt::format("Current: {}x", GameManager::speed));
 }
 
 template <class searchType>
