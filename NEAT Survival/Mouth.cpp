@@ -93,7 +93,7 @@ void Mouth::Bite() {
 	else if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(collidingObjectPtr.lock())) {
 		double eatAmount = Globals::Constrain((double)parent->GetDamage(), 0.0, agent->GetHealth());
 		agent->SetHealth(agent->GetHealth() - eatAmount);
-		agent->DamageRandomNeuron();
+		agent->DamageRandomInput();
 		parent->AddEnergy(eatAmount);
 
 		if (agent->GetHealth() <= 0) {

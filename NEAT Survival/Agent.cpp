@@ -216,6 +216,10 @@ void Agent::Update() {
 			stats.waste += diff;
 		}
 
+		// Higher health == more likely to heal inputs
+		if (rand() % int((1.0 - GetHealthPercent()) * 100 + 20) == 0)
+			RepairRandomInput();
+
 		forwardSpeed = 0;
 		rotationSpeed = 0;
 		wantsToBoost = false;
@@ -391,15 +395,18 @@ void Agent::Reproduce() {
 	stats.energy /= 2;
 }
 
-void Agent::DamageRandomNeuron() {
+void Agent::DamageRandomInput() {
 	damagedInputs.insert(rand() % nn->GetInputNodes().size());
 }
 
-void Agent::RepairRandomNeuron() {
+void Agent::RepairRandomInput() {
 	if (!damagedInputs.size())
 		return;
 
-	damagedInputs.erase(rand() % nn->GetInputNodes().size());
+	auto it = damagedInputs.begin();
+	int r = rand() % damagedInputs.size();
+	advance(it, r);
+	damagedInputs.erase(it);
 }
 
 void Agent::SetGenes(vector<float> newGenes) {

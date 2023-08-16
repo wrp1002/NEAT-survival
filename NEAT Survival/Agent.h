@@ -62,8 +62,8 @@ public:
 	void DrawEnergyBar();
 	void CollisionEvent(shared_ptr<Object> other);
 	void Reproduce();
-	void DamageRandomNeuron();
-	void RepairRandomNeuron();
+	void DamageRandomInput();
+	void RepairRandomInput();
 
 	void SetGenes(vector<float> newGenes);
 	void MutateGenes();

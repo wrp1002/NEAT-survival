@@ -59,6 +59,7 @@ void Toolbar::Init(ALLEGRO_DISPLAY *display) {
 		ALLEGRO_START_OF_MENU("Play", 500),
 			{"Toggle Player", BUTTON_IDS::PLAY_START, 0, NULL },
 			{"Damage Input", BUTTON_IDS::PLAY_DAMAGE_INPUT, 0, NULL },
+            {"Repair Input", BUTTON_IDS::PLAY_REPAIR_INPUT, 0, NULL },
             ALLEGRO_START_OF_MENU("Mutate", BUTTON_IDS::PLAY_MUTATE_MENU),
                 { "Random", BUTTON_IDS::PLAY_MUTATE_RANDOM, 0, NULL },
 				{ "Add Node", BUTTON_IDS::PLAY_MUTATE_ADD_NODE, 0, NULL },
@@ -114,7 +115,12 @@ void Toolbar::HandleEvent(ALLEGRO_EVENT ev) {
         }
         case BUTTON_IDS::PLAY_DAMAGE_INPUT: {
             if (auto player = GameManager::player.lock())
-                player->DamageRandomNeuron();
+                player->DamageRandomInput();
+            break;
+        }
+        case BUTTON_IDS::PLAY_REPAIR_INPUT: {
+            if (auto player = GameManager::player.lock())
+                player->RepairRandomInput();
             break;
         }
         case BUTTON_IDS::PLAY_MUTATE_RANDOM: {
