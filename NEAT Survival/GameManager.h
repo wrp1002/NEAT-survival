@@ -6,7 +6,6 @@
 #include <functional>
 
 #include "CollisionGrid.h"
-
 #include "ThreadPool.h"
 
 class Object;

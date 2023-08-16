@@ -18,7 +18,7 @@ namespace Camera {
 	void UpdateZoom(int diff);
 	void ZoomIn();
 	void ZoomOut();
-	void FollowObject(shared_ptr<Object> obj);
+	void FollowObject(weak_ptr<Object> obj);
 
 	Vector2f CalculatePos();
 	Vector2f ScreenPos2WorldPos(Vector2f screenPos);

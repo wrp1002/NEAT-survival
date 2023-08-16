@@ -6,6 +6,8 @@
 #include "Food.h"
 #include "Egg.h"
 #include "NEAT.h"
+#include "Camera.h"
+#include "InfoDisplay.h"
 
 #include <fmt/core.h>
 
@@ -152,6 +154,8 @@ void GameManager::TogglePlayer() {
 void GameManager::SpawnPlayer() {
 	player = SpawnRandomAgent();
 	player.lock()->SetUserControlled(true);
+	Camera::FollowObject(player);
+    InfoDisplay::SelectObject(player);
 }
 
 void GameManager::DestroyPlayer() {

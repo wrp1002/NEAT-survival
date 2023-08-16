@@ -66,7 +66,7 @@ void Camera::ZoomOut() {
 		zoom = minZoom;
 }
 
-void Camera::FollowObject(shared_ptr<Object> obj) {
+void Camera::FollowObject(weak_ptr<Object> obj) {
 	followObject = obj;
 }
 
@@ -87,8 +87,8 @@ Vector2f Camera::CalculatePos() {
 
 Vector2f Camera::ScreenPos2WorldPos(Vector2f screenPos) {
 	return Vector2f(
-		pos.x + Globals::screenWidth  / 2 - Globals::screenWidth  / 2 / zoom + screenPos.x / zoom,
-		pos.y + Globals::screenHeight / 2 - Globals::screenHeight / 2 / zoom + screenPos.y / zoom
+		pos.x + Globals::screenWidth  / 2.0 - Globals::screenWidth  / 2.0 / zoom + screenPos.x / zoom,
+		pos.y + Globals::screenHeight / 2.0 - Globals::screenHeight / 2.0 / zoom + screenPos.y / zoom
 	);
 }
 

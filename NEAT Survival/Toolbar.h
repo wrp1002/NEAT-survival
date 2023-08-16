@@ -35,6 +35,12 @@ namespace Toolbar {
             SPEED_RESET,
 
             PLAY_START,
+            PLAY_DAMAGE_INPUT,
+            PLAY_MUTATE_MENU,
+            PLAY_MUTATE_RANDOM,
+            PLAY_MUTATE_ADD_NODE,
+            PLAY_MUTATE_REMOVE_NODE,
+            PLAY_MUTATE_ADD_CONNECTION,
         };
     }
 

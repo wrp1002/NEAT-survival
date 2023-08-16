@@ -80,10 +80,6 @@ int main() {
 
 				case ALLEGRO_KEY_P:
 					GameManager::TogglePlayer();
-					if (!GameManager::player.expired()) {
-						Camera::FollowObject(GameManager::player.lock());
-						InfoDisplay::SelectObject(GameManager::player);
-					}
 					break;
 
 				case ALLEGRO_KEY_I:
@@ -99,24 +95,6 @@ int main() {
 						//agent->Reproduce();
 					//GameManager::Reset();
 					break;
-
-
-
-				case ALLEGRO_KEY_N:
-					if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(InfoDisplay::selectedObject.lock()))
-						agent->MutateAddNode();
-					break;
-
-				case ALLEGRO_KEY_M:
-					if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(InfoDisplay::selectedObject.lock()))
-						agent->MutateRemoveNode();
-					break;
-
-				case ALLEGRO_KEY_C:
-					if (shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(InfoDisplay::selectedObject.lock()))
-						agent->MutateAddConnection();
-					break;
-
 
 				case ALLEGRO_KEY_S:
 					for (int i = 0; i < 100; i++)

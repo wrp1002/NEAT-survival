@@ -57,10 +57,15 @@ void Toolbar::Init(ALLEGRO_DISPLAY *display) {
 		ALLEGRO_END_OF_MENU,
 
 		ALLEGRO_START_OF_MENU("Play", 500),
-			{"Spawn Player", BUTTON_IDS::PLAY_START, 0, NULL },
-			{"Current: 1x", 502, 0, NULL },
-			{"Decrease", 503, 0, NULL },
-			{"Reset", 504, 0, NULL },
+			{"Toggle Player", BUTTON_IDS::PLAY_START, 0, NULL },
+			{"Damage Input", BUTTON_IDS::PLAY_DAMAGE_INPUT, 0, NULL },
+            ALLEGRO_START_OF_MENU("Mutate", BUTTON_IDS::PLAY_MUTATE_MENU),
+                { "Random", BUTTON_IDS::PLAY_MUTATE_RANDOM, 0, NULL },
+				{ "Add Node", BUTTON_IDS::PLAY_MUTATE_ADD_NODE, 0, NULL },
+                { "Remove Node", BUTTON_IDS::PLAY_MUTATE_REMOVE_NODE, 0, NULL },
+                { "Add Connection", BUTTON_IDS::PLAY_MUTATE_ADD_CONNECTION, 0, NULL },
+			ALLEGRO_END_OF_MENU,
+
 		ALLEGRO_END_OF_MENU,
 
 		ALLEGRO_END_OF_MENU
@@ -102,58 +107,79 @@ void Toolbar::HandleEvent(ALLEGRO_EVENT ev) {
             break;
         }
 
+        // Play
+        case BUTTON_IDS::PLAY_START: {
+            GameManager::TogglePlayer();
+            break;
+        }
+        case BUTTON_IDS::PLAY_DAMAGE_INPUT: {
+            if (auto player = GameManager::player.lock())
+                player->DamageRandomNeuron();
+            break;
+        }
+        case BUTTON_IDS::PLAY_MUTATE_RANDOM: {
+            if (auto player = GameManager::player.lock())
+                player->Mutate();
+            break;
+        }
+        case BUTTON_IDS::PLAY_MUTATE_ADD_NODE: {
+            if (auto player = GameManager::player.lock())
+                player->MutateAddNode();
+            break;
+        }
+        case BUTTON_IDS::PLAY_MUTATE_REMOVE_NODE: {
+            if (auto player = GameManager::player.lock())
+                player->MutateRemoveNode();
+            break;
+        }
+        case BUTTON_IDS::PLAY_MUTATE_ADD_CONNECTION: {
+            if (auto player = GameManager::player.lock())
+                player->MutateAddConnection();
+            break;
+        }
 
+        // Search
         case BUTTON_IDS::SEARCH_RANDOM: {
             shared_ptr<Agent> selectedAgent = GameManager::GetRandomAgent();
             InfoDisplay::SelectObject(selectedAgent);
             Camera::FollowObject(selectedAgent);
             break;
         }
-        case BUTTON_IDS::SEARCH_HIGHEST_KILLS: {
+        case BUTTON_IDS::SEARCH_HIGHEST_KILLS:
             AgentSearch<int>(true, &Agent::GetKills);
             break;
-        }
-        case BUTTON_IDS::SEARCH_HIGHEST_DAMAGED_INPUTS: {
+        case BUTTON_IDS::SEARCH_HIGHEST_DAMAGED_INPUTS:
             AgentSearch<int>(true, &Agent::GetDamagedInputsCount);
             break;
-        }
-        case BUTTON_IDS::SEARCH_HIGHEST_AGE: {
+        case BUTTON_IDS::SEARCH_HIGHEST_AGE:
             AgentSearch<float>(true, &Agent::GetAge);
             break;
-        }
-        case BUTTON_IDS::SEARCH_HIGHEST_ENERGY: {
+        case BUTTON_IDS::SEARCH_HIGHEST_ENERGY:
             AgentSearch<double>(true, &Agent::GetEnergy);
             break;
-        }
-        case BUTTON_IDS::SEARCH_HIGHEST_HEALTH: {
+        case BUTTON_IDS::SEARCH_HIGHEST_HEALTH:
             AgentSearch<double>(true, &Agent::GetHealth);
             break;
-        }
-        case BUTTON_IDS::SEARCH_LOWEST_KILLS: {
+        case BUTTON_IDS::SEARCH_LOWEST_KILLS:
             AgentSearch<int>(false, &Agent::GetKills);
             break;
-        }
-        case BUTTON_IDS::SEARCH_LOWEST_DAMAGED_INPUTS: {
+        case BUTTON_IDS::SEARCH_LOWEST_DAMAGED_INPUTS:
             AgentSearch<int>(false, &Agent::GetDamagedInputsCount);
             break;
-        }
-        case BUTTON_IDS::SEARCH_LOWEST_AGE: {
+        case BUTTON_IDS::SEARCH_LOWEST_AGE:
             AgentSearch<float>(false, &Agent::GetAge);
             break;
-        }
-        case BUTTON_IDS::SEARCH_LOWEST_ENERGY: {
+        case BUTTON_IDS::SEARCH_LOWEST_ENERGY:
             AgentSearch<double>(false, &Agent::GetEnergy);
             break;
-        }
-        case BUTTON_IDS::SEARCH_LOWEST_HEALTH: {
+        case BUTTON_IDS::SEARCH_LOWEST_HEALTH:
             AgentSearch<double>(false, &Agent::GetHealth);
             break;
-        }
     }
 }
 
 void Toolbar::SetMenuCaption(int id, string text) {
-    cout << "Setting" << id << " to " << text << endl;
+    cout << "Setting button" << id << " to " << text << endl;
     al_set_menu_item_caption(menu, id, text.c_str());
 }
 
